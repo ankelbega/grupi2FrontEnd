@@ -14,16 +14,25 @@ export default function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Maps backend Albanian field names back to form field names for inline errors
+  const errorFieldMap = {
+    PERD_EMER:    'first_name',
+    PERD_MBIEMER: 'last_name',
+    PERD_EMAIL:   'email',
+    PERD_FJKALIM: 'password',
+  };
+
   const onFinish = async (values) => {
     setLoading(true);
     setError(null);
     try {
       const res = await api.post('/api/register', {
-        first_name: values.first_name,
-        last_name: values.last_name,
-        email: values.email,
-        password: values.password,
-        password_confirmation: values.password_confirmation,
+        PERD_EMER:                 values.first_name,
+        PERD_MBIEMER:              values.last_name,
+        PERD_EMAIL:                values.email,
+        PERD_FJKALIM:              values.password,
+        PERD_FJKALIM_confirmation: values.password_confirmation,
+        PERD_TIPI:                 'student',
       });
       if (res.data.success) {
         login(res.data.data.user, res.data.data.token);
@@ -35,7 +44,7 @@ export default function Register() {
         const fieldErrors = err.response.data.errors;
         form.setFields(
           Object.entries(fieldErrors).map(([name, messages]) => ({
-            name,
+            name: errorFieldMap[name] ?? name,
             errors: messages,
           }))
         );

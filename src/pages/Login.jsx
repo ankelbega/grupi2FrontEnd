@@ -14,13 +14,19 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Maps backend Albanian field names back to form field names for inline errors
+  const errorFieldMap = {
+    PERD_EMAIL:   'email',
+    PERD_FJKALIM: 'password',
+  };
+
   const onFinish = async (values) => {
     setLoading(true);
     setError(null);
     try {
       const res = await api.post('/api/login', {
-        email: values.email,
-        password: values.password,
+        PERD_EMAIL:   values.email,
+        PERD_FJKALIM: values.password,
       });
       if (res.data.success) {
         login(res.data.data.user, res.data.data.token);
@@ -34,7 +40,7 @@ export default function Login() {
         const fieldErrors = err.response.data.errors;
         form.setFields(
           Object.entries(fieldErrors).map(([name, messages]) => ({
-            name,
+            name: errorFieldMap[name] ?? name,
             errors: messages,
           }))
         );
