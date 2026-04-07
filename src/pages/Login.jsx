@@ -1,11 +1,25 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Card, Typography, Alert, message } from 'antd';
-import { MailOutlined, LockOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Card, Typography, message } from 'antd';
+import { MailOutlined, LockOutlined, BankOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
+
+const PRIMARY = '#1e3a5f';
+
+const cardStyle = {
+  width: '100%',
+  maxWidth: 420,
+  borderRadius: 12,
+  boxShadow: '0 2px 16px rgba(30,58,95,0.10)',
+  border: '1px solid #e8edf3',
+};
+
+const inputStyle = { borderRadius: 6 };
+
+const iconStyle = { color: '#9ca3af' };
 
 export default function Login() {
   const [form] = Form.useForm();
@@ -22,7 +36,6 @@ export default function Login() {
 
   const onFinish = async (values) => {
     setLoading(true);
-    setError(null);
     try {
       const res = await api.post('/api/login', {
         PERD_EMAIL:   values.email,
@@ -34,18 +47,15 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError('Invalid email or password.');
-      } else if (err.response?.status === 422) {
-        const fieldErrors = err.response.data.errors;
-        form.setFields(
-          Object.entries(fieldErrors).map(([name, messages]) => ({
-            name: errorFieldMap[name] ?? name,
-            errors: messages,
-          }))
-        );
+      const status = err.response?.status;
+      if (status === 429) {
+        message.error(err.response.data.message);
+      } else if (status === 422 || status === 401) {
+        message.error('Email ose fjalëkalim i gabuar.');
+      } else if (status === 500) {
+        message.error('Gabim në server. Provo përsëri më vonë.');
       } else {
-        setError('Something went wrong. Please try again.');
+        message.error('Diçka shkoi gabim. Provo përsëri.');
       }
     } finally {
       setLoading(false);
@@ -53,45 +63,106 @@ export default function Login() {
   };
 
   return (
-    <div className="full-page-center">
-      <Card style={{ width: 420 }}>
-        <Title level={3} style={{ textAlign: 'center', marginBottom: 24 }}>
-          Sign in
+    <div style={{
+      minHeight: '100vh',
+      background: '#f0f2f5',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 24,
+    }}>
+      {/* University branding */}
+      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{
+          width: 60,
+          height: 60,
+          borderRadius: '50%',
+          background: PRIMARY,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 12px',
+          boxShadow: '0 2px 8px rgba(30,58,95,0.25)',
+        }}>
+          <BankOutlined style={{ fontSize: 28, color: '#fff' }} />
+        </div>
+        <Title level={4} style={{ color: PRIMARY, margin: 0, fontWeight: 700, letterSpacing: 0.3 }}>
+          Universiteti
         </Title>
-        {error && (
-          <Alert message={error} type="error" showIcon style={{ marginBottom: 16 }} />
-        )}
-        <Form form={form} layout="vertical" onFinish={onFinish}>
+        <Text type="secondary" style={{ fontSize: 12 }}>University Management System</Text>
+      </div>
+
+      <Card style={cardStyle} styles={{ body: { padding: 32 } }}>
+        <Title level={4} style={{ textAlign: 'center', color: PRIMARY, marginBottom: 24, fontWeight: 600 }}>
+          Hyr në llogarinë tuaj
+        </Title>
+
+        <Form form={form} layout="vertical" onFinish={onFinish} size="large">
           <Form.Item
             name="email"
-            label="Email"
+            label={<Text style={{ color: '#374151', fontWeight: 500 }}>Email</Text>}
             rules={[
-              { required: true, message: 'Please enter your email.' },
-              { type: 'email', message: 'Please enter a valid email.' },
+              { required: true, message: 'Ju lutem shkruani emailin tuaj.' },
+              { type: 'email', message: 'Email i pavlefshëm.' },
             ]}
           >
-            <Input prefix={<MailOutlined />} placeholder="you@example.com" />
+            <Input
+              prefix={<MailOutlined style={iconStyle} />}
+              placeholder="emri@universiteti.edu.al"
+              style={inputStyle}
+              onChange={() => setError(null)}
+            />
           </Form.Item>
+
           <Form.Item
             name="password"
-            label="Password"
-            rules={[{ required: true, message: 'Please enter your password.' }]}
+            label={<Text style={{ color: '#374151', fontWeight: 500 }}>Fjalëkalimi</Text>}
+            rules={[{ required: true, message: 'Ju lutem shkruani fjalëkalimin.' }]}
+            style={{ marginBottom: 20 }}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+            <Input.Password
+              prefix={<LockOutlined style={iconStyle} />}
+              placeholder="••••••••"
+              style={inputStyle}
+              onChange={() => setError(null)}
+            />
           </Form.Item>
-          <Form.Item style={{ marginBottom: 8 }}>
-            <Button type="primary" htmlType="submit" block loading={loading}>
-              Log in
+
+          <Form.Item style={{ marginBottom: 0 }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              loading={loading}
+              style={{
+                background: PRIMARY,
+                borderColor: PRIMARY,
+                borderRadius: 6,
+                height: 44,
+                fontWeight: 600,
+                fontSize: 15,
+                letterSpacing: 0.3,
+              }}
+            >
+              Hyr
             </Button>
           </Form.Item>
         </Form>
-        <div style={{ textAlign: 'center' }}>
-          <Typography.Text>
-            Don&apos;t have an account?{' '}
-            <Link to="/register">Register</Link>
-          </Typography.Text>
+
+        <div style={{ textAlign: 'center', marginTop: 20, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Nuk ke llogari?{' '}
+            <Link to="/register" style={{ color: PRIMARY, fontWeight: 500 }}>
+              Regjistrohu
+            </Link>
+          </Text>
         </div>
       </Card>
+
+      <Text type="secondary" style={{ marginTop: 32, fontSize: 11 }}>
+        University Management System © 2025
+      </Text>
     </div>
   );
 }
