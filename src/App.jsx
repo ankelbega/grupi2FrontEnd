@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import UiKit from './pages/UiKit';
 
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -39,6 +40,7 @@ export default function App() {
               </GuestRoute>
             }
           />
+          <Route path="/ui-kit" element={<UiKit />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
           </Route>

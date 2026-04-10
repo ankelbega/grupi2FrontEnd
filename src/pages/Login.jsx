@@ -63,28 +63,10 @@ export default function Login() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#f0f2f5',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 24,
-    }}>
+    <div className="auth-shell">
       {/* University branding */}
-      <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <div style={{
-          width: 60,
-          height: 60,
-          borderRadius: '50%',
-          background: PRIMARY,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 12px',
-          boxShadow: '0 2px 8px rgba(30,58,95,0.25)',
-        }}>
+      <div className="stagger-in" style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div className="brand-mark">
           <BankOutlined style={{ fontSize: 28, color: '#fff' }} />
         </div>
         <Title level={4} style={{ color: PRIMARY, margin: 0, fontWeight: 700, letterSpacing: 0.3 }}>
@@ -93,7 +75,7 @@ export default function Login() {
         <Text type="secondary" style={{ fontSize: 12 }}>University Management System</Text>
       </div>
 
-      <Card style={cardStyle} styles={{ body: { padding: 32 } }}>
+      <Card className="glass-card stagger-in delay-1" style={cardStyle} styles={{ body: { padding: 32 } }}>
         <Title level={4} style={{ textAlign: 'center', color: PRIMARY, marginBottom: 24, fontWeight: 600 }}>
           Hyr në llogarinë tuaj
         </Title>
@@ -160,7 +142,11 @@ export default function Login() {
         </div>
       </Card>
 
-      <Text type="secondary" style={{ marginTop: 32, fontSize: 11 }}>
+      <Text type="secondary" className="stagger-in delay-2" style={{ marginTop: 18, fontSize: 12 }}>
+        <Link to="/ui-kit" style={{ color: PRIMARY, fontWeight: 600 }}>Shiko UI Kit</Link>
+      </Text>
+
+      <Text type="secondary" className="stagger-in delay-3" style={{ marginTop: 16, fontSize: 11 }}>
         University Management System © 2025
       </Text>
     </div>
