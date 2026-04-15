@@ -4,6 +4,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import LendePage from './pages/LendePage';
+import ProgramStudimiPage from './pages/ProgramStudimiPage';
 
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -41,6 +43,8 @@ export default function App() {
           />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/lende"    element={<LendePage />} />
+            <Route path="/programe" element={<ProgramStudimiPage />} />
           </Route>
         </Routes>
       </AuthProvider>
