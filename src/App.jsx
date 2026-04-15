@@ -6,6 +6,9 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import OrarePage from './pages/OrarePage';
 import OrarFormPage from './pages/OrarFormPage';
+import PedagogPage from './pages/PedagogPage';
+import LendePage from './pages/LendePage';
+import ProgramStudimiPage from './pages/ProgramStudimiPage';
 
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -25,26 +28,15 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<RootRedirect />} />
-          <Route
-            path="/login"
-            element={
-              <GuestRoute>
-                <Login />
-              </GuestRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <GuestRoute>
-                <Register />
-              </GuestRoute>
-            }
-          />
+          <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+          <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/orare" element={<OrarePage />} />
             <Route path="/orare/shto" element={<OrarFormPage />} />
+            <Route path="/pedagoget" element={<PedagogPage />} />
+            <Route path="/lende" element={<LendePage />} />
+            <Route path="/programe" element={<ProgramStudimiPage />} />
           </Route>
         </Routes>
       </AuthProvider>
