@@ -1,5 +1,6 @@
-import { Layout, Card, Typography, Avatar, Button, Tag, Space } from 'antd';
-import { MailOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Layout, Card, Typography, Avatar, Button, Tag, Space, Row, Col } from 'antd';
+import { MailOutlined, LogoutOutlined, TeamOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const { Header, Content } = Layout;
@@ -13,6 +14,7 @@ const roleColors = {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
 
   const roleColor = roleColors[user?.role] ?? 'default';
@@ -47,20 +49,40 @@ export default function Dashboard() {
           </Button>
         </Space>
       </Header>
-      <Content style={{ padding: '48px 24px', display: 'flex', justifyContent: 'center' }}>
-        <Card style={{ width: 480 }}>
-          <Title level={4}>Welcome, {fullName}</Title>
-          <Space direction="vertical" size="small">
-            <Space>
-              <MailOutlined />
-              <Text>{user?.email}</Text>
-            </Space>
-            <Space>
-              <Text>Role:</Text>
-              <Tag color={roleColor}>{user?.role ?? 'N/A'}</Tag>
-            </Space>
-          </Space>
-        </Card>
+      <Content style={{ padding: '48px 24px' }}>
+        <Row gutter={[24, 24]} justify="center">
+          <Col xs={24} sm={20} md={16} lg={12}>
+            <Card>
+              <Title level={4}>Mirë se vini, {fullName}</Title>
+              <Space direction="vertical" size="small">
+                <Space>
+                  <MailOutlined />
+                  <Text>{user?.email}</Text>
+                </Space>
+                <Space>
+                  <Text>Roli:</Text>
+                  <Tag color={roleColor}>{user?.role ?? 'N/A'}</Tag>
+                </Space>
+              </Space>
+            </Card>
+          </Col>
+
+          <Col xs={24} sm={20} md={16} lg={12}>
+            <Card
+              hoverable
+              style={{ cursor: 'pointer', textAlign: 'center' }}
+              onClick={() => navigate('/pedagoget')}
+            >
+              <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                <TeamOutlined style={{ fontSize: 36, color: '#1677ff' }} />
+                <Title level={5} style={{ margin: 0 }}>
+                  Menaxho Pedagogët
+                </Title>
+                <Text type="secondary">Shto, edito dhe fshi pedagogët e universitetit</Text>
+              </Space>
+            </Card>
+          </Col>
+        </Row>
       </Content>
     </Layout>
   );

@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import PedagogPage from './pages/PedagogPage';
 
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -41,6 +42,7 @@ export default function App() {
           />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/pedagoget" element={<PedagogPage />} />
           </Route>
         </Routes>
       </AuthProvider>
