@@ -1,5 +1,5 @@
 import { Layout, Card, Typography, Avatar, Button, Tag, Space, Row, Col } from 'antd';
-import { MailOutlined, LogoutOutlined, TeamOutlined, BookOutlined, ApartmentOutlined } from '@ant-design/icons';
+import { MailOutlined, LogoutOutlined, CalendarOutlined, TeamOutlined, BookOutlined, ApartmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -70,6 +70,13 @@ export default function Dashboard() {
                   <TeamOutlined style={{ fontSize: 32, color: '#722ed1', marginBottom: 8 }} />
                   <Title level={5} style={{ margin: 0 }}>Menaxho Pedagogët</Title>
                   <Text type="secondary">Shto, edito dhe fshi pedagogët</Text>
+                </Card>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Card hoverable style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => navigate('/orare')}>
+                  <CalendarOutlined style={{ fontSize: 32, color: '#fa8c16', marginBottom: 8 }} />
+                  <Title level={5} style={{ margin: 0 }}>Menaxho Oraret</Title>
+                  <Text type="secondary">Shiko dhe shto orare mësimore</Text>
                 </Card>
               </Col>
             </Row>
