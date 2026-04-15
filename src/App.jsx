@@ -4,6 +4,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import OrarePage from './pages/OrarePage';
+import OrarFormPage from './pages/OrarFormPage';
 
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -41,6 +43,8 @@ export default function App() {
           />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/orare" element={<OrarePage />} />
+            <Route path="/orare/shto" element={<OrarFormPage />} />
           </Route>
         </Routes>
       </AuthProvider>
