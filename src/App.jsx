@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import PedagogPage from './pages/PedagogPage';
 import LendePage from './pages/LendePage';
 import ProgramStudimiPage from './pages/ProgramStudimiPage';
 
@@ -25,25 +26,12 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<RootRedirect />} />
-          <Route
-            path="/login"
-            element={
-              <GuestRoute>
-                <Login />
-              </GuestRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <GuestRoute>
-                <Register />
-              </GuestRoute>
-            }
-          />
+          <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+          <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/lende"    element={<LendePage />} />
+            <Route path="/pedagoget" element={<PedagogPage />} />
+            <Route path="/lende" element={<LendePage />} />
             <Route path="/programe" element={<ProgramStudimiPage />} />
           </Route>
         </Routes>
