@@ -1,5 +1,6 @@
-import { Layout, Card, Typography, Avatar, Button, Tag, Space } from 'antd';
-import { MailOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Layout, Card, Typography, Avatar, Button, Tag, Space, Row, Col } from 'antd';
+import { MailOutlined, LogoutOutlined, BookOutlined, ApartmentOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const { Header, Content } = Layout;
@@ -14,6 +15,7 @@ const roleColors = {
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const roleColor = roleColors[user?.role] ?? 'default';
   const fullName = `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
@@ -47,20 +49,49 @@ export default function Dashboard() {
           </Button>
         </Space>
       </Header>
-      <Content style={{ padding: '48px 24px', display: 'flex', justifyContent: 'center' }}>
-        <Card style={{ width: 480 }}>
-          <Title level={4}>Welcome, {fullName}</Title>
-          <Space direction="vertical" size="small">
-            <Space>
-              <MailOutlined />
-              <Text>{user?.email}</Text>
-            </Space>
-            <Space>
-              <Text>Role:</Text>
-              <Tag color={roleColor}>{user?.role ?? 'N/A'}</Tag>
-            </Space>
-          </Space>
-        </Card>
+      <Content style={{ padding: '48px 24px' }}>
+        <Row justify="center">
+          <Col xs={24} sm={20} md={16} lg={12}>
+            <Card style={{ marginBottom: 24 }}>
+              <Title level={4}>Mirë se vini, {fullName}</Title>
+              <Space direction="vertical" size="small">
+                <Space>
+                  <MailOutlined />
+                  <Text>{user?.email}</Text>
+                </Space>
+                <Space>
+                  <Text>Roli:</Text>
+                  <Tag color={roleColor}>{user?.role ?? 'N/A'}</Tag>
+                </Space>
+              </Space>
+            </Card>
+
+            <Row gutter={[16, 16]}>
+              <Col xs={24} sm={12}>
+                <Card
+                  hoverable
+                  style={{ textAlign: 'center', cursor: 'pointer' }}
+                  onClick={() => navigate('/lende')}
+                >
+                  <BookOutlined style={{ fontSize: 32, color: '#1677ff', marginBottom: 8 }} />
+                  <Title level={5} style={{ margin: 0 }}>Menaxho Lëndët</Title>
+                  <Text type="secondary">Shiko, shto dhe edito lëndët</Text>
+                </Card>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Card
+                  hoverable
+                  style={{ textAlign: 'center', cursor: 'pointer' }}
+                  onClick={() => navigate('/programe')}
+                >
+                  <ApartmentOutlined style={{ fontSize: 32, color: '#52c41a', marginBottom: 8 }} />
+                  <Title level={5} style={{ margin: 0 }}>Menaxho Programet</Title>
+                  <Text type="secondary">Shiko, shto dhe edito programet e studimit</Text>
+                </Card>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
       </Content>
     </Layout>
   );
