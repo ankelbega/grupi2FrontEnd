@@ -1,508 +1,307 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Layout, Steps, Select, Button, Card, Alert, message,
-  Row, Col, Typography, Space, Tag, TimePicker, Divider, Spin,
+  Layout, Steps, Card, Button, Select, TimePicker, Form, Space,
+  Typography, Spin, message, Tag, Descriptions, Alert, Row, Col,
 } from 'antd';
 import {
-  DesktopOutlined, TeamOutlined, ArrowLeftOutlined,
-  CheckCircleOutlined,
+  CalendarOutlined, HomeOutlined, ClockCircleOutlined,
+  ArrowLeftOutlined, CheckCircleOutlined, InfoCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { getSeksionet } from '../api/seksionApi';
-import { kontrolloKonfliktet, createOrar } from '../api/orarApi';
-import { SALLET_LIST } from '../api/salleApi';
-import { useAuth } from '../context/AuthContext';
+import { getOrarById, createOrar, updateOrar } from '../api/orarApi';
 
 const { Header, Content } = Layout;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 
-const SEMESTRAT = [1, 2, 3, 4, 5, 6].map((i) => ({
-  SEM_ID: i,
-  SEM_EM: `Semestri ${i}`,
-}));
+const API_BASE = 'http://localhost:8000/api';
 
-const DITET = [
-  { value: 1, label: 'E Hene' },
-  { value: 2, label: 'E Marte' },
-  { value: 3, label: 'E Merkure' },
-  { value: 4, label: 'E Enjte' },
-  { value: 5, label: 'E Premte' },
-];
-
-const LLOJET = ['Ligjerate', 'Seminar', 'Laborator'];
-
-const LLOJI_COLORS = {
-  Ligjerate: 'blue',
-  Seminar: 'green',
-  Laborator: 'orange',
-};
-
-function getSeksionLabel(s) {
-  const lenEm = s?.lenda?.LEN_EM || s?.LEN_EM || '—';
-  const pedEm = s?.pedagog?.PED_EMER || s?.PED_EMER || '';
-  const pedMb = s?.pedagog?.PED_MBIEMER || s?.PED_MBIEMER || '';
-  return `${s.SEK_KOD} - ${lenEm} (${pedEm} ${pedMb})`;
+function authHeaders() {
+  return {
+    Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+  };
 }
 
-function getDitaLabel(val) {
-  return DITET.find((d) => d.value === val)?.label || String(val);
+const DAYS = [
+  { key: 1, label: 'E Hënë' },
+  { key: 2, label: 'E Martë' },
+  { key: 3, label: 'E Mërkurë' },
+  { key: 4, label: 'E Enjte' },
+  { key: 5, label: 'E Premte' },
+];
+
+const SALLET = [
+  { id: 1, name: 'Salla A101' },
+  { id: 2, name: 'Salla A102' },
+  { id: 3, name: 'Salla A103' },
+  { id: 4, name: 'Salla A104' },
+  { id: 5, name: 'Salla B101' },
+  { id: 6, name: 'Salla B102' },
+  { id: 7, name: 'Salla B103' },
+  { id: 8, name: 'Salla B104' },
+];
+
+const LLOJI_OPTIONS = [
+  { value: 'ligjerata', label: 'Ligjëratë' },
+  { value: 'seminar', label: 'Seminar' },
+  { value: 'laborator', label: 'Laborator' },
+];
+
+function getSeksLabel(s) {
+  const lenda = s.lenda?.LENDA_EM ?? s.LENDA_EM ?? s.lenda_em ?? '';
+  const ped = s.pedagog
+    ? `${s.pedagog.PERD_EMER ?? ''} ${s.pedagog.PERD_MBIEMER ?? ''}`.trim()
+    : '';
+  const sem = s.SEM_ID ?? s.sem_id ?? '';
+  const parts = [lenda, ped, sem ? `Sem.${sem}` : ''].filter(Boolean);
+  return parts.join(' – ') || `Seksioni ${s.SEK_ID ?? s.id}`;
 }
 
 export default function OrarFormPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const [searchParams] = useSearchParams();
+  const isEditMode = !!id;
 
   const [currentStep, setCurrentStep] = useState(0);
-
-  // Step 1
-  const [semId, setSemId] = useState(null);
   const [seksionet, setSeksionet] = useState([]);
-  const [loadingSeks, setLoadingSeks] = useState(false);
-  const [selectedSeksion, setSelectedSeksion] = useState(null);
+  const [loadingSek, setLoadingSek] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Step 2
+  const [semestri, setSemestri] = useState(null);
+  const [selectedSeksioni, setSelectedSeksioni] = useState(null);
   const [selectedSalla, setSelectedSalla] = useState(null);
+  const [orarDita, setOrarDita] = useState(null);
+  const [orarOraFill, setOrarOraFill] = useState(null);
+  const [orarOraMba, setOrarOraMba] = useState(null);
+  const [orarLloji, setOrarLloji] = useState(null);
 
-  // Step 3
-  const [dita, setDita] = useState(null);
-  const [oraFill, setOraFill] = useState(null);
-  const [oraMba, setOraMba] = useState(null);
-  const [lloji, setLloji] = useState(null);
-  const [konfliktStatus, setKonfliktStatus] = useState(null); // null | 'ok' | 'error'
-  const [konfliktet, setKonfliktet] = useState([]);
-  const [checkingKonfliktet, setCheckingKonfliktet] = useState(false);
-
-  // Step 4
-  const [saving, setSaving] = useState(false);
-
-  // Load seksionet when semester changes
   useEffect(() => {
-    if (!semId) {
+    if (isEditMode && id) {
+      loadOrarData();
+    } else if (!isEditMode) {
+      fetchSeksionet();
+      const dita = searchParams.get('dita');
+      const ora_fill = searchParams.get('ora_fill');
+      if (dita) setOrarDita(Number(dita));
+      if (ora_fill) setOrarOraFill(dayjs(ora_fill, 'HH:mm'));
+    }
+  }, [id, isEditMode]);
+
+  async function fetchSeksionet(semId) {
+    setLoadingSek(true);
+    try {
+      const url = semId ? `${API_BASE}/seksione?sem_id=${semId}` : `${API_BASE}/seksione`;
+      const res = await fetch(url, { headers: authHeaders() });
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : data.data ?? [];
+      setSeksionet(list);
+      return list;
+    } catch {
       setSeksionet([]);
-      setSelectedSeksion(null);
-      return;
+      return [];
+    } finally {
+      setLoadingSek(false);
     }
-    setLoadingSeks(true);
-    setSelectedSeksion(null);
-    getSeksionet({ sem_id: semId })
-      .then((res) => setSeksionet(res.data?.data || res.data || []))
-      .catch(() => message.error('Gabim gjate ngarkimit te seksioneve'))
-      .finally(() => setLoadingSeks(false));
-  }, [semId]);
-
-  // Reset conflict check when step-3 fields change
-  function resetKonfliktet() {
-    setKonfliktStatus(null);
-    setKonfliktet([]);
   }
 
-  async function handleKontrolloKonfliktet() {
-    if (!dita || !oraFill || !oraMba || !lloji) {
-      message.warning('Plotesoni te gjitha fushat para kontrollit');
-      return;
+  async function loadOrarData() {
+    setLoadingData(true);
+    try {
+      const data = await getOrarById(id);
+      const sem_id = data.seksioni?.SEM_ID ?? data.seksioni?.sem_id;
+      const sek_id = data.SEK_ID ?? data.sek_id ?? data.seksioni?.SEK_ID;
+      const salle_id = data.SALLE_ID ?? data.salle_id;
+      const dita = data.ORAR_DITA ?? data.orar_dita;
+      const oraFillRaw = data.ORAR_ORA_FILL ?? data.orar_ora_fill ?? '';
+      const oraMbaRaw = data.ORAR_ORA_MBA ?? data.orar_ora_mba ?? '';
+      const lloji = (data.ORAR_LLOJI ?? data.orar_lloji ?? '').toLowerCase();
+
+      if (sem_id) {
+        setSemestri(sem_id);
+        const list = await fetchSeksionet(sem_id);
+        const matchedSek = list.find(s => String(s.SEK_ID ?? s.id) === String(sek_id));
+        setSelectedSeksioni(matchedSek ? (matchedSek.SEK_ID ?? matchedSek.id) : sek_id ?? null);
+      } else {
+        setSelectedSeksioni(sek_id ?? null);
+      }
+
+      setSelectedSalla(salle_id ? Number(salle_id) : null);
+      setOrarDita(dita ? Number(dita) : null);
+      const fillShort = oraFillRaw.substring(0, 5);
+      const mbaShort = oraMbaRaw.substring(0, 5);
+      setOrarOraFill(fillShort ? dayjs(fillShort, 'HH:mm') : null);
+      setOrarOraMba(mbaShort ? dayjs(mbaShort, 'HH:mm') : null);
+      setOrarLloji(lloji || null);
+    } catch {
+      message.error('Gabim gjatë ngarkimit të të dhënave');
+    } finally {
+      setLoadingData(false);
     }
-    setCheckingKonfliktet(true);
+  }
+
+  async function handleSubmit() {
+    setSubmitting(true);
     try {
       const payload = {
-        SEKS_ID: selectedSeksion.SEK_ID,
-        SALLE_ID: selectedSalla.SALLE_ID,
-        ORAR_DITA: dita,
-        ORAR_ORA_FILL: oraFill.format('HH:mm'),
-        ORAR_ORA_MBA: oraMba.format('HH:mm'),
-        ORAR_LLOJI: lloji,
+        SEK_ID: selectedSeksioni,
+        SALLE_ID: selectedSalla,
+        ORAR_DITA: orarDita,
+        ORAR_ORA_FILL: orarOraFill ? orarOraFill.format('HH:mm') : null,
+        ORAR_ORA_MBA: orarOraMba ? orarOraMba.format('HH:mm') : null,
+        ORAR_LLOJI: orarLloji,
       };
-      const res = await kontrolloKonfliktet(payload);
-      const data = res.data;
-      const conflicts = data?.conflicts || data?.konflikte || [];
-      if (conflicts.length === 0) {
-        setKonfliktStatus('ok');
-        setKonfliktet([]);
+      if (isEditMode) {
+        await updateOrar(id, payload);
+        message.success('Orari u perditesua me sukses');
       } else {
-        setKonfliktStatus('error');
-        setKonfliktet(conflicts);
+        await createOrar(payload);
+        message.success('Orari u shtua me sukses');
       }
-    } catch (err) {
-      const conflicts =
-        err.response?.data?.conflicts ||
-        err.response?.data?.konflikte ||
-        [];
-      if (conflicts.length > 0) {
-        setKonfliktStatus('error');
-        setKonfliktet(conflicts);
-      } else {
-        message.error('Gabim gjate kontrollit te konflikteve');
-      }
+      navigate('/orare/kalendar');
+    } catch(err) {
+      message.error(err.message ?? 'Gabim gjatë ruajtjes së orarit');
     } finally {
-      setCheckingKonfliktet(false);
+      setSubmitting(false);
     }
   }
 
-  async function handleSave() {
-    setSaving(true);
-    try {
-      const payload = {
-        SEKS_ID: selectedSeksion.SEK_ID,
-        SALLE_ID: selectedSalla.SALLE_ID,
-        ORAR_DITA: dita,
-        ORAR_ORA_FILL: oraFill.format('HH:mm'),
-        ORAR_ORA_MBA: oraMba.format('HH:mm'),
-        ORAR_LLOJI: lloji,
-      };
-      await createOrar(payload);
-      message.success('Orari u shtua me sukses');
-      navigate('/orare');
-    } catch (err) {
-      if (err.response?.status === 409) {
-        const msg =
-          err.response?.data?.message ||
-          err.response?.data?.error ||
-          'Konflikte te zbuluara';
-        message.error(msg);
-      } else {
-        message.error('Ndodhi nje gabim');
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  const step3AllFilled = dita && oraFill && oraMba && lloji;
-  const step3Valid = step3AllFilled && konfliktStatus === 'ok';
-
-  const steps = [
-    { title: 'Semestri & Lenda' },
-    { title: 'Salla' },
-    { title: 'Dita & Ora' },
-    { title: 'Konfirmo' },
+  const STEPS_CONFIG = [
+    { title: 'Seksioni', icon: <CalendarOutlined /> },
+    { title: 'Salla', icon: <HomeOutlined /> },
+    { title: 'Orari', icon: <ClockCircleOutlined /> },
+    { title: 'Konfirmo', icon: <CheckCircleOutlined /> },
   ];
 
+  const canProceedStep0 = !!selectedSeksioni;
+  const canProceedStep1 = !!selectedSalla;
+  const canProceedStep2 = !!orarDita && !!orarOraFill && !!orarOraMba && !!orarLloji;
+
+  const selectedSeksObj = seksionet.find((s) => (s.SEK_ID ?? s.id) === selectedSeksioni);
+  const selectedSallaObj = SALLET.find((s) => s.id === selectedSalla);
+  const selectedDitaLabel = DAYS.find((d) => d.key === orarDita)?.label ?? '';
+  const selectedLlojiLabel = LLOJI_OPTIONS.find((l) => l.value === orarLloji)?.label ?? '';
+
+  if (loadingData) {
+    return (
+      <Layout style={{ minHeight: '100vh', background: '#f5f7fa', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Spin size="large" />
+      </Layout>
+    );
+  }
+
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: '#001529',
-          padding: '0 24px',
-        }}
-      >
+    <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
+      <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#001529', padding: '0 24px' }}>
         <Space>
-          <Button
-            type="text"
-            icon={<ArrowLeftOutlined />}
-            style={{ color: '#fff' }}
-            onClick={() => navigate('/orare')}
-          >
-            Kthehu te Oraret
-          </Button>
+          <CalendarOutlined style={{ color: '#1677ff', fontSize: 20 }} />
           <Title level={4} style={{ color: '#fff', margin: 0 }}>
-            Shto Orar te Ri
+            {isEditMode ? 'Edito Orarin' : 'Shto Orar te Ri'}
           </Title>
         </Space>
-        <Button type="text" danger onClick={logout} style={{ color: '#ff4d4f' }}>
-          Logout
+        <Button type="link" icon={<ArrowLeftOutlined />} style={{ color: '#aaa' }} onClick={() => navigate('/orare/kalendar')}>
+          Kthehu
         </Button>
       </Header>
 
-      <Content style={{ padding: '32px 48px' }}>
-        <Steps current={currentStep} items={steps} style={{ marginBottom: 32 }} />
+      <Content style={{ padding: '32px 24px', maxWidth: 720, margin: '0 auto', width: '100%' }}>
+        <Steps current={currentStep} items={STEPS_CONFIG} style={{ marginBottom: 32 }} />
 
-        {/* ───── STEP 1 ───── */}
-        {currentStep === 0 && (
-          <Card title="Zgjidh Semestrin dhe Lenden" style={{ maxWidth: 640 }}>
+        <Card style={{ borderRadius: 8 }}>
+          {currentStep === 0 && (
             <Space direction="vertical" style={{ width: '100%' }} size="large">
-              <div>
-                <Text strong>Semestri</Text>
-                <Select
-                  placeholder="Zgjidh semestrin"
-                  style={{ width: '100%', marginTop: 8 }}
-                  value={semId}
-                  onChange={(val) => setSemId(val)}
-                >
-                  {SEMESTRAT.map((s) => (
-                    <Option key={s.SEM_ID} value={s.SEM_ID}>
-                      {s.SEM_EM}
-                    </Option>
-                  ))}
+              <Title level={5}>Zgjidhni Seksionin</Title>
+              {loadingSek ? (
+                <div style={{ textAlign: 'center', padding: 24 }}><Spin /></div>
+              ) : (
+                <Select style={{ width: '100%' }} placeholder="Kërko dhe zgjidhni seksionin..." value={selectedSeksioni} onChange={setSelectedSeksioni} showSearch optionFilterProp="label" size="large">
+                  {seksionet.map((s) => {
+                    const key = s.SEK_ID ?? s.id;
+                    return <Option key={key} value={key} label={getSeksLabel(s)}>{getSeksLabel(s)}</Option>;
+                  })}
                 </Select>
-              </div>
-
-              {semId && (
-                <div>
-                  <Text strong>Seksioni</Text>
-                  <Spin spinning={loadingSeks}>
-                    <Select
-                      placeholder="Zgjidh seksionin"
-                      style={{ width: '100%', marginTop: 8 }}
-                      value={selectedSeksion?.SEK_ID ?? null}
-                      onChange={(val) => {
-                        const obj = seksionet.find((s) => s.SEK_ID === val);
-                        setSelectedSeksion(obj || null);
-                      }}
-                      showSearch
-                      optionFilterProp="children"
-                      notFoundContent={
-                        loadingSeks ? <Spin size="small" /> : 'Nuk u gjet asnje seksion'
-                      }
-                    >
-                      {seksionet.map((s) => (
-                        <Option key={s.SEK_ID} value={s.SEK_ID}>
-                          {getSeksionLabel(s)}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Spin>
-                </div>
               )}
-
-              <Button
-                type="primary"
-                disabled={!selectedSeksion}
-                onClick={() => setCurrentStep(1)}
-              >
-                Vazhdo
-              </Button>
+              <div style={{ textAlign: 'right' }}>
+                <Button type="primary" disabled={!canProceedStep0} onClick={() => setCurrentStep(1)}>Vazhdo</Button>
+              </div>
             </Space>
-          </Card>
-        )}
+          )}
 
-        {/* ───── STEP 2 ───── */}
-        {currentStep === 1 && (
-          <div style={{ maxWidth: 860 }}>
-            <Title level={5} style={{ marginBottom: 16 }}>
-              Zgjidh Sallen
-            </Title>
-            <Row gutter={[16, 16]}>
-              {SALLET_LIST.map((salla) => {
-                const isSelected = selectedSalla?.SALLE_ID === salla.SALLE_ID;
-                return (
-                  <Col xs={24} sm={12} md={8} key={salla.SALLE_ID}>
-                    <Card
-                      hoverable
-                      onClick={() => setSelectedSalla(salla)}
-                      style={{
-                        borderColor: isSelected ? '#1677ff' : undefined,
-                        borderWidth: isSelected ? 2 : 1,
-                        background: isSelected ? '#e6f4ff' : undefined,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                        <Text strong>{salla.SALLE_EMRI}</Text>
-                        <Space>
-                          <TeamOutlined />
-                          <Text type="secondary">Kapaciteti: {salla.SALLE_KAP}</Text>
-                        </Space>
-                        {salla.AUD_KA_PROJEKTOR === 1 && (
-                          <Space>
-                            <DesktopOutlined style={{ color: '#1677ff' }} />
-                            <Text type="secondary" style={{ fontSize: 12 }}>
-                              Ka projektor
-                            </Text>
-                          </Space>
-                        )}
-                        {salla.is_laborator === 1 && (
-                          <Tag color="purple">Laborator</Tag>
-                        )}
-                        {isSelected && (
-                          <CheckCircleOutlined style={{ color: '#1677ff', fontSize: 16 }} />
-                        )}
-                      </Space>
-                    </Card>
+          {currentStep === 1 && (
+            <Space direction="vertical" style={{ width: '100%' }} size="large">
+              <Title level={5}>Zgjidhni Sallën</Title>
+              <Select style={{ width: '100%' }} placeholder="Zgjidhni sallën..." value={selectedSalla} onChange={setSelectedSalla} size="large">
+                {SALLET.map((s) => <Option key={s.id} value={s.id}>{s.name}</Option>)}
+              </Select>
+              <Row justify="space-between">
+                <Button onClick={() => setCurrentStep(0)}>Prapa</Button>
+                <Button type="primary" disabled={!canProceedStep1} onClick={() => setCurrentStep(2)}>Vazhdo</Button>
+              </Row>
+            </Space>
+          )}
+
+          {currentStep === 2 && (
+            <Space direction="vertical" style={{ width: '100%' }} size="large">
+              <Title level={5}>Detajet e Orarit</Title>
+              <Form layout="vertical" component="div">
+                <Form.Item label="Dita e Javës" required>
+                  <Select style={{ width: '100%' }} placeholder="Zgjidhni ditën..." value={orarDita} onChange={setOrarDita} size="large">
+                    {DAYS.map((d) => <Option key={d.key} value={d.key}>{d.label}</Option>)}
+                  </Select>
+                </Form.Item>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item label="Ora Fillimit" required>
+                      <TimePicker style={{ width: '100%' }} format="HH:mm" minuteStep={30} value={orarOraFill} onChange={setOrarOraFill} size="large" placeholder="Ora e fillimit" />
+                    </Form.Item>
                   </Col>
-                );
-              })}
-            </Row>
-            <Space style={{ marginTop: 24 }}>
-              <Button onClick={() => setCurrentStep(0)}>Kthehu</Button>
-              <Button
-                type="primary"
-                disabled={!selectedSalla}
-                onClick={() => setCurrentStep(2)}
-              >
-                Vazhdo
-              </Button>
-            </Space>
-          </div>
-        )}
-
-        {/* ───── STEP 3 ───── */}
-        {currentStep === 2 && (
-          <Card title="Zgjidh Diten dhe Oren" style={{ maxWidth: 560 }}>
-            <Space direction="vertical" style={{ width: '100%' }} size="middle">
-              <div>
-                <Text strong>Dita</Text>
-                <Select
-                  placeholder="Zgjidh diten"
-                  style={{ width: '100%', marginTop: 8 }}
-                  value={dita}
-                  onChange={(val) => { setDita(val); resetKonfliktet(); }}
-                >
-                  {DITET.map((d) => (
-                    <Option key={d.value} value={d.value}>
-                      {d.label}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
-
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Text strong>Ora e fillimit</Text>
-                  <br />
-                  <TimePicker
-                    format="HH:mm"
-                    minuteStep={30}
-                    style={{ width: '100%', marginTop: 8 }}
-                    value={oraFill}
-                    onChange={(val) => { setOraFill(val); resetKonfliktet(); }}
-                    placeholder="08:00"
-                  />
-                </Col>
-                <Col span={12}>
-                  <Text strong>Ora e mbarimit</Text>
-                  <br />
-                  <TimePicker
-                    format="HH:mm"
-                    minuteStep={30}
-                    style={{ width: '100%', marginTop: 8 }}
-                    value={oraMba}
-                    onChange={(val) => { setOraMba(val); resetKonfliktet(); }}
-                    placeholder="09:30"
-                    disabledTime={() => {
-                      if (!oraFill) return {};
-                      const fillHour = oraFill.hour();
-                      const fillMin = oraFill.minute();
-                      return {
-                        disabledHours: () =>
-                          Array.from({ length: fillHour }, (_, i) => i),
-                        disabledMinutes: (h) =>
-                          h === fillHour
-                            ? Array.from({ length: fillMin + 1 }, (_, i) => i)
-                            : [],
-                      };
-                    }}
-                  />
-                </Col>
+                  <Col span={12}>
+                    <Form.Item label="Ora Mbarimit" required>
+                      <TimePicker style={{ width: '100%' }} format="HH:mm" minuteStep={30} value={orarOraMba} onChange={setOrarOraMba} size="large" placeholder="Ora e mbarimit" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Form.Item label="Lloji i Orës" required>
+                  <Select style={{ width: '100%' }} placeholder="Zgjidhni llojin..." value={orarLloji} onChange={setOrarLloji} size="large">
+                    {LLOJI_OPTIONS.map((l) => <Option key={l.value} value={l.value}>{l.label}</Option>)}
+                  </Select>
+                </Form.Item>
+              </Form>
+              <Row justify="space-between">
+                <Button onClick={() => setCurrentStep(1)}>Prapa</Button>
+                <Button type="primary" disabled={!canProceedStep2} onClick={() => setCurrentStep(3)}>Vazhdo</Button>
               </Row>
-
-              <div>
-                <Text strong>Lloji i ores</Text>
-                <Select
-                  placeholder="Zgjidh llojin"
-                  style={{ width: '100%', marginTop: 8 }}
-                  value={lloji}
-                  onChange={(val) => { setLloji(val); resetKonfliktet(); }}
-                >
-                  {LLOJET.map((l) => (
-                    <Option key={l} value={l}>
-                      <Tag color={LLOJI_COLORS[l]}>{l}</Tag>
-                    </Option>
-                  ))}
-                </Select>
-              </div>
-
-              <Button
-                onClick={handleKontrolloKonfliktet}
-                loading={checkingKonfliktet}
-                disabled={!step3AllFilled}
-              >
-                Kontrollo Konfliktet
-              </Button>
-
-              {konfliktStatus === 'ok' && (
-                <Alert
-                  type="success"
-                  message="Nuk ka perplasje! Mund te vazhdoni."
-                  showIcon
-                />
-              )}
-              {konfliktStatus === 'error' && (
-                <Alert
-                  type="error"
-                  message="Konflikte te zbuluara"
-                  description={
-                    <ul style={{ marginBottom: 0, paddingLeft: 16 }}>
-                      {konfliktet.map((k, i) => (
-                        <li key={i}>{typeof k === 'string' ? k : JSON.stringify(k)}</li>
-                      ))}
-                    </ul>
-                  }
-                  showIcon
-                />
-              )}
-
-              <Space>
-                <Button onClick={() => setCurrentStep(1)}>Kthehu</Button>
-                <Button
-                  type="primary"
-                  disabled={!step3Valid}
-                  onClick={() => setCurrentStep(3)}
-                >
-                  Vazhdo
-                </Button>
-              </Space>
             </Space>
-          </Card>
-        )}
+          )}
 
-        {/* ───── STEP 4 ───── */}
-        {currentStep === 3 && (
-          <Card title="Konfirmo dhe Ruaj" style={{ maxWidth: 560 }}>
-            <Space direction="vertical" style={{ width: '100%' }} size="small">
-              <Divider orientation="left" plain>
-                Detajet e Orarit
-              </Divider>
-
-              <Row gutter={[8, 12]}>
-                <Col span={8}><Text type="secondary">Seksioni:</Text></Col>
-                <Col span={16}>
-                  <Text strong>{getSeksionLabel(selectedSeksion)}</Text>
-                </Col>
-
-                <Col span={8}><Text type="secondary">Salla:</Text></Col>
-                <Col span={16}>
-                  <Text strong>
-                    {selectedSalla?.SALLE_EMRI} — Kapaciteti: {selectedSalla?.SALLE_KAP}
-                  </Text>
-                </Col>
-
-                <Col span={8}><Text type="secondary">Dita:</Text></Col>
-                <Col span={16}>
-                  <Text strong>{getDitaLabel(dita)}</Text>
-                </Col>
-
-                <Col span={8}><Text type="secondary">Ora:</Text></Col>
-                <Col span={16}>
-                  <Text strong>
-                    {oraFill?.format('HH:mm')} — {oraMba?.format('HH:mm')}
-                  </Text>
-                </Col>
-
-                <Col span={8}><Text type="secondary">Lloji:</Text></Col>
-                <Col span={16}>
-                  <Tag color={LLOJI_COLORS[lloji]}>{lloji}</Tag>
-                </Col>
+          {currentStep === 3 && (
+            <Space direction="vertical" style={{ width: '100%' }} size="large">
+              <Title level={5}>Konfirmo dhe Ruaj</Title>
+              {isEditMode && (
+                <Alert type="info" icon={<InfoCircleOutlined />} showIcon message="Duke edituar orarin ekzistues" style={{ borderRadius: 6 }} />
+              )}
+              <Descriptions bordered column={1} size="small">
+                <Descriptions.Item label="Seksioni">{selectedSeksObj ? getSeksLabel(selectedSeksObj) : `ID: ${selectedSeksioni}`}</Descriptions.Item>
+                <Descriptions.Item label="Salla">{selectedSallaObj?.name ?? `ID: ${selectedSalla}`}</Descriptions.Item>
+                <Descriptions.Item label="Dita">{selectedDitaLabel}</Descriptions.Item>
+                <Descriptions.Item label="Ora Fillimit">{orarOraFill ? orarOraFill.format('HH:mm') : '—'}</Descriptions.Item>
+                <Descriptions.Item label="Ora Mbarimit">{orarOraMba ? orarOraMba.format('HH:mm') : '—'}</Descriptions.Item>
+                <Descriptions.Item label="Lloji">
+                  <Tag color={orarLloji === 'ligjerata' ? 'blue' : orarLloji === 'seminar' ? 'green' : 'orange'}>{selectedLlojiLabel}</Tag>
+                </Descriptions.Item>
+              </Descriptions>
+              <Row justify="space-between">
+                <Button onClick={() => setCurrentStep(2)}>Prapa</Button>
+                <Button type="primary" loading={submitting} onClick={handleSubmit}>Ruaj Orarin</Button>
               </Row>
-
-              <Divider />
-
-              <Space>
-                <Button onClick={() => setCurrentStep(2)}>Kthehu</Button>
-                <Button
-                  type="primary"
-                  loading={saving}
-                  onClick={handleSave}
-                >
-                  Ruaj Orarin
-                </Button>
-              </Space>
             </Space>
-          </Card>
-        )}
+          )}
+        </Card>
       </Content>
     </Layout>
   );

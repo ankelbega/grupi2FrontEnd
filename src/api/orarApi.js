@@ -1,28 +1,69 @@
-import api from './axios';
+const API_BASE = 'http://localhost:8000/api';
 
-const BASE = 'http://localhost:8000/api';
+function authHeaders() {
+  return {
+    Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+  };
+}
 
-export const getOrare = (filters = {}) => {
+export async function getOrare(filters = {}) {
   const params = new URLSearchParams();
-  if (filters.ped_id)      params.append('ped_id',      filters.ped_id);
-  if (filters.salle_id)    params.append('salle_id',    filters.salle_id);
-  if (filters.sem_id)      params.append('sem_id',      filters.sem_id);
-  if (filters.dita)        params.append('dita',        filters.dita);
-  if (filters.kurr_ver_id) params.append('kurr_ver_id', filters.kurr_ver_id);
-  return api.get(`${BASE}/orare?${params.toString()}`);
-};
+  Object.entries(filters).forEach(([k, v]) => { if (v) params.append(k, v); });
+  const url = `${API_BASE}/orare${params.toString() ? '?' + params.toString() : ''}`;
+  const res = await fetch(url, { headers: authHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch orare');
+  const json = await res.json();
+  return json.data ?? json;
+}
 
-export const getOrarById = (id) =>
-  api.get(`${BASE}/orare/${id}`);
+export async function getOrarById(id) {
+  const res = await fetch(`${API_BASE}/orare/${id}`, { headers: authHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch orar');
+  const json = await res.json();
+  return json.data ?? json;
+}
 
-export const createOrar = (data) =>
-  api.post(`${BASE}/orare`, data);
+export async function createOrar(data) {
+  const res = await fetch(`${API_BASE}/orare`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message ?? 'Failed to create orar');
+  return json.data ?? json;
+}
 
-export const updateOrar = (id, data) =>
-  api.put(`${BASE}/orare/${id}`, data);
+export async function updateOrar(id, data) {
+  const res = await fetch(`${API_BASE}/orare/${id}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message ?? 'Failed to update orar');
+  return json.data ?? json;
+}
 
-export const deleteOrar = (id) =>
-  api.delete(`${BASE}/orare/${id}`);
+export async function deleteOrar(id) {
+  const res = await fetch(`${API_BASE}/orare/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message ?? 'Failed to delete orar');
+  return json;
+}
 
-export const kontrolloKonfliktet = (data) =>
-  api.post(`${BASE}/orare/kontrollo`, data);
+export async function kontrolloKonfliktet(data) {
+  const res = await fetch(`${API_BASE}/orare/kontrollo`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  return json;
+}
