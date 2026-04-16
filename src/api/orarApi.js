@@ -20,9 +20,7 @@ export async function getOrare(filters = {}) {
 }
 
 export async function getOrarById(id) {
-  const res = await fetch(`${API_BASE}/orare/${id}`, {
-    headers: authHeaders()
-  });
+  const res = await fetch(`${API_BASE}/orare/${id}`, { headers: authHeaders() });
   if (!res.ok) throw new Error('Failed to fetch orar');
   const json = await res.json();
   return json.data ?? json;
@@ -34,8 +32,9 @@ export async function createOrar(data) {
     headers: authHeaders(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to create orar');
-  return res.json();
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message ?? 'Failed to create orar');
+  return json.data ?? json;
 }
 
 export async function updateOrar(id, data) {
@@ -44,6 +43,27 @@ export async function updateOrar(id, data) {
     headers: authHeaders(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to update orar');
-  return res.json();
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message ?? 'Failed to update orar');
+  return json.data ?? json;
+}
+
+export async function deleteOrar(id) {
+  const res = await fetch(`${API_BASE}/orare/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message ?? 'Failed to delete orar');
+  return json;
+}
+
+export async function kontrolloKonfliktet(data) {
+  const res = await fetch(`${API_BASE}/orare/kontrollo`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  return json;
 }

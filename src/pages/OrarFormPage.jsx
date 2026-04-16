@@ -1,30 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Layout,
-  Steps,
-  Card,
-  Button,
-  Select,
-  TimePicker,
-  Form,
-  Space,
-  Typography,
-  Spin,
-  message,
-  Tag,
-  Descriptions,
-  Alert,
-  Row,
-  Col,
+  Layout, Steps, Card, Button, Select, TimePicker, Form, Space,
+  Typography, Spin, message, Tag, Descriptions, Alert, Row, Col,
 } from 'antd';
 import {
-  CalendarOutlined,
-  HomeOutlined,
-  ClockCircleOutlined,
-  ArrowLeftOutlined,
-  CheckCircleOutlined,
-  InfoCircleOutlined,
+  CalendarOutlined, HomeOutlined, ClockCircleOutlined,
+  ArrowLeftOutlined, CheckCircleOutlined, InfoCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getOrarById, createOrar, updateOrar } from '../api/orarApi';
@@ -40,6 +22,7 @@ function authHeaders() {
     Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
     Accept: 'application/json',
     'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   };
 }
 
@@ -74,19 +57,12 @@ function getSeksLabel(s) {
     ? `${s.pedagog.PERD_EMER ?? ''} ${s.pedagog.PERD_MBIEMER ?? ''}`.trim()
     : '';
   const sem = s.SEM_ID ?? s.sem_id ?? '';
-  const viti = s.VITI ?? s.viti ?? '';
-  const parts = [
-    lenda,
-    ped,
-    sem ? `Sem.${sem}` : '',
-    viti ? `Viti ${viti}` : '',
-  ].filter(Boolean);
+  const parts = [lenda, ped, sem ? `Sem.${sem}` : ''].filter(Boolean);
   return parts.join(' – ') || `Seksioni ${s.SEK_ID ?? s.id}`;
 }
 
 export default function OrarFormPage() {
   const { id } = useParams();
-  console.log('OrarFormPage - id from useParams:', id, 'isEditMode:', !!id);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isEditMode = !!id;
@@ -120,9 +96,7 @@ export default function OrarFormPage() {
   async function fetchSeksionet(semId) {
     setLoadingSek(true);
     try {
-      const url = semId
-        ? `${API_BASE}/seksione?sem_id=${semId}`
-        : `${API_BASE}/seksione`;
+      const url = semId ? `${API_BASE}/seksione?sem_id=${semId}` : `${API_BASE}/seksione`;
       const res = await fetch(url, { headers: authHeaders() });
       const data = await res.json();
       const list = Array.isArray(data) ? data : data.data ?? [];
@@ -148,7 +122,6 @@ export default function OrarFormPage() {
       const oraMbaRaw = data.ORAR_ORA_MBA ?? data.orar_ora_mba ?? '';
       const lloji = (data.ORAR_LLOJI ?? data.orar_lloji ?? '').toLowerCase();
 
-      // Set semestri and fetch filtered seksionet before pre-selecting
       if (sem_id) {
         setSemestri(sem_id);
         const list = await fetchSeksionet(sem_id);
@@ -157,9 +130,9 @@ export default function OrarFormPage() {
       } else {
         setSelectedSeksioni(sek_id ?? null);
       }
+
       setSelectedSalla(salle_id ? Number(salle_id) : null);
       setOrarDita(dita ? Number(dita) : null);
-      // Convert "08:00:00.0000000" → dayjs("08:00", "HH:mm")
       const fillShort = oraFillRaw.substring(0, 5);
       const mbaShort = oraMbaRaw.substring(0, 5);
       setOrarOraFill(fillShort ? dayjs(fillShort, 'HH:mm') : null);
@@ -183,7 +156,6 @@ export default function OrarFormPage() {
         ORAR_ORA_MBA: orarOraMba ? orarOraMba.format('HH:mm') : null,
         ORAR_LLOJI: orarLloji,
       };
-
       if (isEditMode) {
         await updateOrar(id, payload);
         message.success('Orari u perditesua me sukses');
@@ -192,8 +164,8 @@ export default function OrarFormPage() {
         message.success('Orari u shtua me sukses');
       }
       navigate('/orare/kalendar');
-    } catch {
-      message.error('Gabim gjatë ruajtjes së orarit');
+    } catch(err) {
+      message.error(err.message ?? 'Gabim gjatë ruajtjes së orarit');
     } finally {
       setSubmitting(false);
     }
@@ -210,273 +182,122 @@ export default function OrarFormPage() {
   const canProceedStep1 = !!selectedSalla;
   const canProceedStep2 = !!orarDita && !!orarOraFill && !!orarOraMba && !!orarLloji;
 
-  const selectedSeksObj = seksionet.find(
-    (s) => (s.SEK_ID ?? s.id) === selectedSeksioni
-  );
+  const selectedSeksObj = seksionet.find((s) => (s.SEK_ID ?? s.id) === selectedSeksioni);
   const selectedSallaObj = SALLET.find((s) => s.id === selectedSalla);
   const selectedDitaLabel = DAYS.find((d) => d.key === orarDita)?.label ?? '';
-  const selectedLlojiLabel =
-    LLOJI_OPTIONS.find((l) => l.value === orarLloji)?.label ?? '';
+  const selectedLlojiLabel = LLOJI_OPTIONS.find((l) => l.value === orarLloji)?.label ?? '';
 
   if (loadingData) {
     return (
-      <Layout
-        style={{
-          minHeight: '100vh',
-          background: '#f5f7fa',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Spin size="large" tip="Duke ngarkuar të dhënat..." />
+      <Layout style={{ minHeight: '100vh', background: '#f5f7fa', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Spin size="large" />
       </Layout>
     );
   }
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
-      <Header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: '#001529',
-          padding: '0 24px',
-        }}
-      >
+      <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#001529', padding: '0 24px' }}>
         <Space>
           <CalendarOutlined style={{ color: '#1677ff', fontSize: 20 }} />
           <Title level={4} style={{ color: '#fff', margin: 0 }}>
             {isEditMode ? 'Edito Orarin' : 'Shto Orar te Ri'}
           </Title>
         </Space>
-        <Button
-          type="link"
-          icon={<ArrowLeftOutlined />}
-          style={{ color: '#aaa' }}
-          onClick={() => navigate('/orare/kalendar')}
-        >
+        <Button type="link" icon={<ArrowLeftOutlined />} style={{ color: '#aaa' }} onClick={() => navigate('/orare/kalendar')}>
           Kthehu
         </Button>
       </Header>
 
-      <Content
-        style={{
-          padding: '32px 24px',
-          maxWidth: 720,
-          margin: '0 auto',
-          width: '100%',
-        }}
-      >
-        <Steps
-          current={currentStep}
-          items={STEPS_CONFIG}
-          style={{ marginBottom: 32 }}
-        />
+      <Content style={{ padding: '32px 24px', maxWidth: 720, margin: '0 auto', width: '100%' }}>
+        <Steps current={currentStep} items={STEPS_CONFIG} style={{ marginBottom: 32 }} />
 
         <Card style={{ borderRadius: 8 }}>
-          {/* STEP 0: Seksioni */}
           {currentStep === 0 && (
             <Space direction="vertical" style={{ width: '100%' }} size="large">
               <Title level={5}>Zgjidhni Seksionin</Title>
               {loadingSek ? (
-                <div style={{ textAlign: 'center', padding: 24 }}>
-                  <Spin tip="Duke ngarkuar seksionet..." />
-                </div>
+                <div style={{ textAlign: 'center', padding: 24 }}><Spin /></div>
               ) : (
-                <Select
-                  style={{ width: '100%' }}
-                  placeholder="Kërko dhe zgjidhni seksionin..."
-                  value={selectedSeksioni}
-                  onChange={setSelectedSeksioni}
-                  showSearch
-                  optionFilterProp="label"
-                  size="large"
-                >
+                <Select style={{ width: '100%' }} placeholder="Kërko dhe zgjidhni seksionin..." value={selectedSeksioni} onChange={setSelectedSeksioni} showSearch optionFilterProp="label" size="large">
                   {seksionet.map((s) => {
                     const key = s.SEK_ID ?? s.id;
-                    return (
-                      <Option key={key} value={key} label={getSeksLabel(s)}>
-                        {getSeksLabel(s)}
-                      </Option>
-                    );
+                    return <Option key={key} value={key} label={getSeksLabel(s)}>{getSeksLabel(s)}</Option>;
                   })}
                 </Select>
               )}
               <div style={{ textAlign: 'right' }}>
-                <Button
-                  type="primary"
-                  disabled={!canProceedStep0}
-                  onClick={() => setCurrentStep(1)}
-                >
-                  Vazhdo
-                </Button>
+                <Button type="primary" disabled={!canProceedStep0} onClick={() => setCurrentStep(1)}>Vazhdo</Button>
               </div>
             </Space>
           )}
 
-          {/* STEP 1: Salla */}
           {currentStep === 1 && (
             <Space direction="vertical" style={{ width: '100%' }} size="large">
               <Title level={5}>Zgjidhni Sallën</Title>
-              <Select
-                style={{ width: '100%' }}
-                placeholder="Zgjidhni sallën..."
-                value={selectedSalla}
-                onChange={setSelectedSalla}
-                size="large"
-              >
-                {SALLET.map((s) => (
-                  <Option key={s.id} value={s.id}>
-                    {s.name}
-                  </Option>
-                ))}
+              <Select style={{ width: '100%' }} placeholder="Zgjidhni sallën..." value={selectedSalla} onChange={setSelectedSalla} size="large">
+                {SALLET.map((s) => <Option key={s.id} value={s.id}>{s.name}</Option>)}
               </Select>
               <Row justify="space-between">
                 <Button onClick={() => setCurrentStep(0)}>Prapa</Button>
-                <Button
-                  type="primary"
-                  disabled={!canProceedStep1}
-                  onClick={() => setCurrentStep(2)}
-                >
-                  Vazhdo
-                </Button>
+                <Button type="primary" disabled={!canProceedStep1} onClick={() => setCurrentStep(2)}>Vazhdo</Button>
               </Row>
             </Space>
           )}
 
-          {/* STEP 2: Time/Day/Type */}
           {currentStep === 2 && (
             <Space direction="vertical" style={{ width: '100%' }} size="large">
               <Title level={5}>Detajet e Orarit</Title>
               <Form layout="vertical" component="div">
                 <Form.Item label="Dita e Javës" required>
-                  <Select
-                    style={{ width: '100%' }}
-                    placeholder="Zgjidhni ditën..."
-                    value={orarDita}
-                    onChange={setOrarDita}
-                    size="large"
-                  >
-                    {DAYS.map((d) => (
-                      <Option key={d.key} value={d.key}>
-                        {d.label}
-                      </Option>
-                    ))}
+                  <Select style={{ width: '100%' }} placeholder="Zgjidhni ditën..." value={orarDita} onChange={setOrarDita} size="large">
+                    {DAYS.map((d) => <Option key={d.key} value={d.key}>{d.label}</Option>)}
                   </Select>
                 </Form.Item>
                 <Row gutter={16}>
                   <Col span={12}>
                     <Form.Item label="Ora Fillimit" required>
-                      <TimePicker
-                        style={{ width: '100%' }}
-                        format="HH:mm"
-                        minuteStep={30}
-                        value={orarOraFill}
-                        onChange={setOrarOraFill}
-                        size="large"
-                        placeholder="Ora e fillimit"
-                      />
+                      <TimePicker style={{ width: '100%' }} format="HH:mm" minuteStep={30} value={orarOraFill} onChange={setOrarOraFill} size="large" placeholder="Ora e fillimit" />
                     </Form.Item>
                   </Col>
                   <Col span={12}>
                     <Form.Item label="Ora Mbarimit" required>
-                      <TimePicker
-                        style={{ width: '100%' }}
-                        format="HH:mm"
-                        minuteStep={30}
-                        value={orarOraMba}
-                        onChange={setOrarOraMba}
-                        size="large"
-                        placeholder="Ora e mbarimit"
-                      />
+                      <TimePicker style={{ width: '100%' }} format="HH:mm" minuteStep={30} value={orarOraMba} onChange={setOrarOraMba} size="large" placeholder="Ora e mbarimit" />
                     </Form.Item>
                   </Col>
                 </Row>
                 <Form.Item label="Lloji i Orës" required>
-                  <Select
-                    style={{ width: '100%' }}
-                    placeholder="Zgjidhni llojin..."
-                    value={orarLloji}
-                    onChange={setOrarLloji}
-                    size="large"
-                  >
-                    {LLOJI_OPTIONS.map((l) => (
-                      <Option key={l.value} value={l.value}>
-                        {l.label}
-                      </Option>
-                    ))}
+                  <Select style={{ width: '100%' }} placeholder="Zgjidhni llojin..." value={orarLloji} onChange={setOrarLloji} size="large">
+                    {LLOJI_OPTIONS.map((l) => <Option key={l.value} value={l.value}>{l.label}</Option>)}
                   </Select>
                 </Form.Item>
               </Form>
               <Row justify="space-between">
                 <Button onClick={() => setCurrentStep(1)}>Prapa</Button>
-                <Button
-                  type="primary"
-                  disabled={!canProceedStep2}
-                  onClick={() => setCurrentStep(3)}
-                >
-                  Vazhdo
-                </Button>
+                <Button type="primary" disabled={!canProceedStep2} onClick={() => setCurrentStep(3)}>Vazhdo</Button>
               </Row>
             </Space>
           )}
 
-          {/* STEP 3: Summary */}
           {currentStep === 3 && (
             <Space direction="vertical" style={{ width: '100%' }} size="large">
               <Title level={5}>Konfirmo dhe Ruaj</Title>
               {isEditMode && (
-                <Alert
-                  type="info"
-                  icon={<InfoCircleOutlined />}
-                  showIcon
-                  message="Duke edituar orarin ekzistues"
-                  style={{ borderRadius: 6 }}
-                />
+                <Alert type="info" icon={<InfoCircleOutlined />} showIcon message="Duke edituar orarin ekzistues" style={{ borderRadius: 6 }} />
               )}
               <Descriptions bordered column={1} size="small">
-                <Descriptions.Item label="Seksioni">
-                  {selectedSeksObj
-                    ? getSeksLabel(selectedSeksObj)
-                    : `ID: ${selectedSeksioni}`}
-                </Descriptions.Item>
-                <Descriptions.Item label="Salla">
-                  {selectedSallaObj?.name ?? `ID: ${selectedSalla}`}
-                </Descriptions.Item>
-                <Descriptions.Item label="Dita">
-                  {selectedDitaLabel}
-                </Descriptions.Item>
-                <Descriptions.Item label="Ora Fillimit">
-                  {orarOraFill ? orarOraFill.format('HH:mm') : '—'}
-                </Descriptions.Item>
-                <Descriptions.Item label="Ora Mbarimit">
-                  {orarOraMba ? orarOraMba.format('HH:mm') : '—'}
-                </Descriptions.Item>
+                <Descriptions.Item label="Seksioni">{selectedSeksObj ? getSeksLabel(selectedSeksObj) : `ID: ${selectedSeksioni}`}</Descriptions.Item>
+                <Descriptions.Item label="Salla">{selectedSallaObj?.name ?? `ID: ${selectedSalla}`}</Descriptions.Item>
+                <Descriptions.Item label="Dita">{selectedDitaLabel}</Descriptions.Item>
+                <Descriptions.Item label="Ora Fillimit">{orarOraFill ? orarOraFill.format('HH:mm') : '—'}</Descriptions.Item>
+                <Descriptions.Item label="Ora Mbarimit">{orarOraMba ? orarOraMba.format('HH:mm') : '—'}</Descriptions.Item>
                 <Descriptions.Item label="Lloji">
-                  <Tag
-                    color={
-                      orarLloji === 'ligjerata'
-                        ? 'blue'
-                        : orarLloji === 'seminar'
-                        ? 'green'
-                        : 'orange'
-                    }
-                  >
-                    {selectedLlojiLabel}
-                  </Tag>
+                  <Tag color={orarLloji === 'ligjerata' ? 'blue' : orarLloji === 'seminar' ? 'green' : 'orange'}>{selectedLlojiLabel}</Tag>
                 </Descriptions.Item>
               </Descriptions>
               <Row justify="space-between">
                 <Button onClick={() => setCurrentStep(2)}>Prapa</Button>
-                <Button
-                  type="primary"
-                  loading={submitting}
-                  onClick={handleSubmit}
-                >
-                  Ruaj Orarin
-                </Button>
+                <Button type="primary" loading={submitting} onClick={handleSubmit}>Ruaj Orarin</Button>
               </Row>
             </Space>
           )}
