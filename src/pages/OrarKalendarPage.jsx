@@ -309,9 +309,10 @@ export default function OrarKalendarPage() {
                 onChange={(v) => setFilters((p) => ({ ...p, pedagog_id: v ?? null }))}
                 showSearch
                 optionFilterProp="children"
+                getPopupContainer={(trigger) => trigger.parentElement}
               >
                 {pedagoget.map((ped) => (
-                  <Option key={ped.id ?? ped.ID} value={ped.id ?? ped.ID}>
+                  <Option key={ped.PED_ID ?? ped.id ?? ped.ID} value={ped.PED_ID ?? ped.id ?? ped.ID}>
                     {`${ped.PERD_EMER ?? ped.perd_emer ?? ''} ${ped.PERD_MBIEMER ?? ped.perd_mbiemer ?? ''}`.trim()}
                   </Option>
                 ))}
@@ -326,9 +327,10 @@ export default function OrarKalendarPage() {
                 onChange={(v) => setFilters((p) => ({ ...p, program_id: v ?? null }))}
                 showSearch
                 optionFilterProp="children"
+                getPopupContainer={(trigger) => trigger.parentElement}
               >
                 {programet.map((prog) => (
-                  <Option key={prog.id ?? prog.ID} value={prog.id ?? prog.ID}>
+                  <Option key={prog.PROG_ID ?? prog.id ?? prog.ID} value={prog.PROG_ID ?? prog.id ?? prog.ID}>
                     {prog.PROG_EM ?? prog.prog_em ?? prog.emri ?? ''}
                   </Option>
                 ))}
@@ -341,6 +343,7 @@ export default function OrarKalendarPage() {
                 allowClear
                 value={filters.viti}
                 onChange={(v) => setFilters((p) => ({ ...p, viti: v ?? null }))}
+                getPopupContainer={(trigger) => trigger.parentElement}
               >
                 {[1, 2, 3, 4].map((v) => (
                   <Option key={v} value={v}>
@@ -356,6 +359,7 @@ export default function OrarKalendarPage() {
                 allowClear
                 value={filters.salla_id}
                 onChange={(v) => setFilters((p) => ({ ...p, salla_id: v ?? null }))}
+                getPopupContainer={(trigger) => trigger.parentElement}
               >
                 {SALLET.map((s) => (
                   <Option key={s.id} value={s.id}>
@@ -371,6 +375,7 @@ export default function OrarKalendarPage() {
                 allowClear
                 value={filters.semestri}
                 onChange={(v) => setFilters((p) => ({ ...p, semestri: v ?? null }))}
+                getPopupContainer={(trigger) => trigger.parentElement}
               >
                 {[1, 2, 3, 4, 5, 6].map((s) => (
                   <Option key={s} value={s}>

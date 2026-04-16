@@ -52,12 +52,10 @@ const LLOJI_OPTIONS = [
 ];
 
 function getSeksLabel(s) {
-  const lenda = s.lenda?.LENDA_EM ?? s.LENDA_EM ?? s.lenda_em ?? '';
-  const ped = s.pedagog
-    ? `${s.pedagog.PERD_EMER ?? ''} ${s.pedagog.PERD_MBIEMER ?? ''}`.trim()
-    : '';
-  const sem = s.SEM_ID ?? s.sem_id ?? '';
-  const parts = [lenda, ped, sem ? `Sem.${sem}` : ''].filter(Boolean);
+  const lenda = s.lenda_em ?? s.lenda?.LEN_EM ?? s.lenda?.LENDA_EM ?? s.LEN_EM ?? '';
+  const ped = s.pedagog_em ?? (s.pedagog ? `${s.pedagog.PERD_EMER ?? ''} ${s.pedagog.PERD_MBIEMER ?? ''}`.trim() : '');
+  const kod = s.SEK_KOD ?? s.sek_kod ?? '';
+  const parts = [kod, lenda, ped].filter(Boolean);
   return parts.join(' – ') || `Seksioni ${s.SEK_ID ?? s.id}`;
 }
 
@@ -149,13 +147,16 @@ export default function OrarFormPage() {
     setSubmitting(true);
     try {
       const payload = {
-        SEK_ID: selectedSeksioni,
-        SALLE_ID: selectedSalla,
-        ORAR_DITA: orarDita,
+        SEK_ID: Number(selectedSeksioni),
+        SALLE_ID: Number(selectedSalla),
+        ORAR_DITA: Number(orarDita),
         ORAR_ORA_FILL: orarOraFill ? orarOraFill.format('HH:mm') : null,
         ORAR_ORA_MBA: orarOraMba ? orarOraMba.format('HH:mm') : null,
         ORAR_LLOJI: orarLloji,
       };
+
+      console.log('Submitting payload:', payload);
+
       if (isEditMode) {
         await updateOrar(id, payload);
         message.success('Orari u perditesua me sukses');
