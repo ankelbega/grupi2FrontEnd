@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import UiKit from './pages/UiKit';
+import OrarKalendarPage from './pages/OrarKalendarPage';
+import OrarFormPage from './pages/OrarFormPage';
 
 function RootRedirect() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -43,6 +45,9 @@ export default function App() {
           <Route path="/ui-kit" element={<UiKit />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/orare/kalendar" element={<OrarKalendarPage />} />
+            <Route path="/orare/shto" element={<OrarFormPage />} />
+            <Route path="/orare/edito/:id" element={<OrarFormPage />} />
           </Route>
         </Routes>
       </AuthProvider>
