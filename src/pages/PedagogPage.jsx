@@ -10,7 +10,6 @@ import {
   Modal,
   Form,
   Input,
-  InputNumber,
   DatePicker,
   Popconfirm,
   message,
@@ -95,6 +94,8 @@ export default function PedagogPage() {
   const [editingPedagog, setEditingPedagog] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [form] = Form.useForm();
+  const [perd_emer, setPerdEmer] = useState('');
+  const [perd_mbiemer, setPerdMbiemer] = useState('');
 
   useEffect(() => {
     fetchPedagoget();
@@ -185,13 +186,18 @@ export default function PedagogPage() {
   function openCreate() {
     setEditingPedagog(null);
     form.resetFields();
+    setPerdEmer('');
+    setPerdMbiemer('');
     setFormVisible(true);
   }
 
   function openEdit(record) {
     setEditingPedagog(record);
+    setPerdEmer(record.PERD_EMER ?? '');
+    setPerdMbiemer(record.PERD_MBIEMER ?? '');
     form.setFieldsValue({
-      PERD_ID: record.PERD_ID ?? record.user_id,
+      PERD_EMER: record.PERD_EMER ?? '',
+      PERD_MBIEMER: record.PERD_MBIEMER ?? '',
       DEP_ID: record.DEP_ID ?? record.dep_id,
       PED_KOD: record.PED_KOD,
       PED_SPECIALIZIM: record.PED_SPECIALIZIM,
@@ -210,6 +216,9 @@ export default function PedagogPage() {
     }
     const payload = {
       ...values,
+      PERD_ID: null,
+      PERD_EMER: perd_emer,
+      PERD_MBIEMER: perd_mbiemer,
       PED_DATA_PUNESIMIT: values.PED_DATA_PUNESIMIT
         ? values.PED_DATA_PUNESIMIT.format('YYYY-MM-DD')
         : undefined,
@@ -565,13 +574,31 @@ export default function PedagogPage() {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="PERD_ID"
-                label="ID i Përdoruesit"
-                rules={[{ required: true, message: 'Fushat PERD_ID është e detyrueshme.' }]}
+                name="PERD_EMER"
+                label="Emri"
+                rules={[{ required: true, message: 'Emri është i detyrueshëm.' }]}
               >
-                <InputNumber style={{ width: '100%' }} min={1} placeholder="p.sh. 5" />
+                <Input
+                  placeholder="p.sh. Arben"
+                  onChange={(e) => setPerdEmer(e.target.value)}
+                />
               </Form.Item>
             </Col>
+            <Col span={12}>
+              <Form.Item
+                name="PERD_MBIEMER"
+                label="Mbiemri"
+                rules={[{ required: true, message: 'Mbiemri është i detyrueshëm.' }]}
+              >
+                <Input
+                  placeholder="p.sh. Krasniqi"
+                  onChange={(e) => setPerdMbiemer(e.target.value)}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="DEP_ID"
@@ -587,9 +614,6 @@ export default function PedagogPage() {
                 </Select>
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="PED_KOD"
@@ -599,6 +623,9 @@ export default function PedagogPage() {
                 <Input placeholder="p.sh. PED001" />
               </Form.Item>
             </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="PED_SPECIALIZIM"
@@ -608,9 +635,6 @@ export default function PedagogPage() {
                 <Input placeholder="p.sh. Inteligjencë Artificiale" />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="PED_LLOJ_KONTRATE"
@@ -623,6 +647,9 @@ export default function PedagogPage() {
                 </Select>
               </Form.Item>
             </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="PED_DATA_PUNESIMIT"

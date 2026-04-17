@@ -145,7 +145,7 @@ export default function OrarKalendarPage() {
     try {
       const params = new URLSearchParams();
       if (f.pedagog_id) params.append('ped_id', String(f.pedagog_id));
-      if (f.program_id) params.append('program_id', f.program_id);
+      if (f.program_id) params.append('prog_id', f.program_id);
       if (f.viti) params.append('viti', f.viti);
       if (f.salla_id) params.append('salle_id', String(f.salla_id));
       if (f.semestri) params.append('semestri', f.semestri);
