@@ -166,7 +166,12 @@ export default function OrarFormPage() {
       }
       navigate('/orare/kalendar');
     } catch(err) {
-      message.error(err.message ?? 'Gabim gjatë ruajtjes së orarit');
+      const lines = (err.message ?? 'Gabim gjate ruajtjes').split('\n');
+      if (lines.length > 1) {
+        lines.forEach(line => message.error(line, 6));
+      } else {
+        message.error(lines[0], 6);
+      }
     } finally {
       setSubmitting(false);
     }

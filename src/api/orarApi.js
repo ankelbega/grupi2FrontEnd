@@ -33,7 +33,12 @@ export async function createOrar(data) {
     body: JSON.stringify(data),
   });
   const json = await res.json();
-  if (!res.ok) throw new Error(json.message ?? 'Failed to create orar');
+  if (!res.ok) {
+    const errorMsg = json.mesazh ?? json.message ?? 'Gabim gjate ruajtjes';
+    const konflikte = json.konflikte ?? [];
+    const fullMsg = konflikte.length > 0 ? konflikte.join('\n') : errorMsg;
+    throw new Error(fullMsg);
+  }
   return json.data ?? json;
 }
 
@@ -44,7 +49,12 @@ export async function updateOrar(id, data) {
     body: JSON.stringify(data),
   });
   const json = await res.json();
-  if (!res.ok) throw new Error(json.message ?? 'Failed to update orar');
+  if (!res.ok) {
+    const errorMsg = json.mesazh ?? json.message ?? 'Gabim gjate ruajtjes';
+    const konflikte = json.konflikte ?? [];
+    const fullMsg = konflikte.length > 0 ? konflikte.join('\n') : errorMsg;
+    throw new Error(fullMsg);
+  }
   return json.data ?? json;
 }
 
