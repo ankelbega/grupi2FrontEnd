@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { getLende, getLendeById, createLende, updateLende, deleteLende, getPedagogetELendes } from '../api/lendeApi';
+import { VITET } from '../config/constants';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -256,7 +257,7 @@ export default function LendePage() {
                 style={{ width: '100%' }}
                 value={filterViti}
                 onChange={setFilterViti}
-                options={[1, 2, 3, 4].map((v) => ({ value: v, label: `Viti ${v}` }))}
+                options={VITET.map((v) => ({ value: v, label: `Viti ${v}` }))}
               />
             </Col>
             <Col xs={12} sm={6} md={3}>

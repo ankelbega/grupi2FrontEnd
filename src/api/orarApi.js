@@ -1,13 +1,4 @@
-const API_BASE = 'http://localhost:8000/api';
-
-function authHeaders() {
-  return {
-    Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-  };
-}
+import { API_BASE, authHeaders } from '../config/constants';
 
 export async function getOrare(filters = {}) {
   const params = new URLSearchParams();

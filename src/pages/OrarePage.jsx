@@ -9,6 +9,7 @@ import { getOrare, deleteOrar } from '../api/orarApi';
 import { SALLET_LIST } from '../api/salleApi';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE, SEMESTRAT, TIME_SLOTS } from '../config/constants';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -21,13 +22,6 @@ const DITET = [
   { value: 4, label: 'E Enjte' },
   { value: 5, label: 'E Premte' },
 ];
-
-const TIME_SLOTS = ['08:00', '09:30', '11:00', '12:30', '14:00', '15:30'];
-
-const SEMESTRAT = [1, 2, 3, 4, 5, 6].map((i) => ({
-  SEM_ID: i,
-  SEM_EM: `Semestri ${i}`,
-}));
 
 const LLOJI_COLORS = {
   Ligjerate: 'blue',
@@ -101,7 +95,7 @@ export default function OrarePage() {
 
   const fetchPedagoget = useCallback(() => {
     api
-      .get('http://localhost:8000/api/pedagoget')
+      .get(`${API_BASE}/pedagoget`)
       .then((res) => setPedagoget(res.data?.data || res.data || []))
       .catch(() => {});
   }, []);

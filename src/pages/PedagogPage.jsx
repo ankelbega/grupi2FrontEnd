@@ -38,6 +38,7 @@ import {
   updatePedagog,
   deletePedagog,
 } from '../api/pedagogApi';
+import { SEMESTRAT } from '../config/constants';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -455,9 +456,9 @@ export default function PedagogPage() {
                 value={semId}
                 onChange={setSemId}
               >
-                {[1, 2, 3, 4, 5, 6].map((s) => (
-                  <Option key={s} value={s}>
-                    Semestri {s}
+                {SEMESTRAT.map((s) => (
+                  <Option key={s.SEM_ID} value={s.SEM_ID}>
+                    {s.SEM_EM}
                   </Option>
                 ))}
               </Select>

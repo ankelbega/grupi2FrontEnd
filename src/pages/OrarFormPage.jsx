@@ -10,46 +10,11 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getOrarById, createOrar, updateOrar } from '../api/orarApi';
+import { API_BASE, authHeaders, DAYS, SALLET, LLOJI_OPTIONS } from '../config/constants';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
 const { Option } = Select;
-
-const API_BASE = 'http://localhost:8000/api';
-
-function authHeaders() {
-  return {
-    Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-  };
-}
-
-const DAYS = [
-  { key: 1, label: 'E Hënë' },
-  { key: 2, label: 'E Martë' },
-  { key: 3, label: 'E Mërkurë' },
-  { key: 4, label: 'E Enjte' },
-  { key: 5, label: 'E Premte' },
-];
-
-const SALLET = [
-  { id: 1, name: 'Salla A101' },
-  { id: 2, name: 'Salla A102' },
-  { id: 3, name: 'Salla A103' },
-  { id: 4, name: 'Salla A104' },
-  { id: 5, name: 'Salla B101' },
-  { id: 6, name: 'Salla B102' },
-  { id: 7, name: 'Salla B103' },
-  { id: 8, name: 'Salla B104' },
-];
-
-const LLOJI_OPTIONS = [
-  { value: 'ligjerata', label: 'Ligjëratë' },
-  { value: 'seminar', label: 'Seminar' },
-  { value: 'laborator', label: 'Laborator' },
-];
 
 function getSeksLabel(s) {
   const lenda = s.lenda_em ?? s.lenda?.LEN_EM ?? s.lenda?.LENDA_EM ?? s.LEN_EM ?? '';

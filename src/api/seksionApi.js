@@ -1,6 +1,5 @@
 import api from './axios';
-
-const BASE = 'http://localhost:8000/api';
+import { API_BASE as BASE } from '../config/constants';
 
 export const getSeksionet = (filters = {}) => {
   const params = new URLSearchParams();
