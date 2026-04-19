@@ -1,4 +1,4 @@
-import api from './axios';
+import api from './axiosInstance';
 import { API_BASE as BASE } from '../config/constants';
 
 export function getPedagoget(filters = {}) {
