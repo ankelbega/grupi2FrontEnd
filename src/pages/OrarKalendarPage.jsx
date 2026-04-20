@@ -50,7 +50,7 @@ function getTodayDita() {
 
 export default function OrarKalendarPage() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
 
   const [pedagoget, setPedag] = useState([]);
   const [programet, setProg] = useState([]);
@@ -171,6 +171,7 @@ export default function OrarKalendarPage() {
   }
 
   function handleEmptyCellClick(dita, timeSlot) {
+    if (!isAdmin) return;
     navigate(`/orare/shto?dita=${dita}&ora_fill=${encodeURIComponent(timeSlot)}`);
   }
 
@@ -400,8 +401,8 @@ export default function OrarKalendarPage() {
                           key={d.key}
                           style={{
                             ...cellStyle,
-                            background: isHovered && entries.length === 0 ? '#f0f7ff' : '#fff',
-                            cursor: entries.length === 0 ? 'pointer' : 'default',
+                            background: isAdmin && isHovered && entries.length === 0 ? '#f0f7ff' : '#fff',
+                            cursor: isAdmin && entries.length === 0 ? 'pointer' : 'default',
                             transition: 'background 0.2s',
                           }}
                           onMouseEnter={() => setHoveredCell(cellKey)}
@@ -410,7 +411,7 @@ export default function OrarKalendarPage() {
                             if (entries.length === 0) handleEmptyCellClick(d.key, slot);
                           }}
                         >
-                          {entries.length === 0 && isHovered && (
+                          {isAdmin && entries.length === 0 && isHovered && (
                             <div
                               style={{
                                 position: 'absolute',
@@ -701,25 +702,29 @@ export default function OrarKalendarPage() {
                   <Divider />
 
                   <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-                    <Button
-                      icon={<EditOutlined />}
-                      type="primary"
-                      onClick={() => navigate(`/orare/edito/${orar.ORAR_ID ?? orar.id ?? orar.ID}`)}
-                    >
-                      Edito
-                    </Button>
-                    <Popconfirm
-                      title="Fshi Orarin"
-                      description="A jeni i sigurt që doni të fshini këtë orar?"
-                      okText="Po, fshi"
-                      cancelText="Anulo"
-                      okButtonProps={{ danger: true, loading: deletingId === (orar.ORAR_ID ?? orar.id ?? orar.ID) }}
-                      onConfirm={() => handleDelete(orar.ORAR_ID ?? orar.id ?? orar.ID)}
-                    >
-                      <Button danger icon={<DeleteOutlined />}>
-                        Fshi
+                    {isAdmin && (
+                      <Button
+                        icon={<EditOutlined />}
+                        type="primary"
+                        onClick={() => navigate(`/orare/edito/${orar.ORAR_ID ?? orar.id ?? orar.ID}`)}
+                      >
+                        Edito
                       </Button>
-                    </Popconfirm>
+                    )}
+                    {isAdmin && (
+                      <Popconfirm
+                        title="Fshi Orarin"
+                        description="A jeni i sigurt që doni të fshini këtë orar?"
+                        okText="Po, fshi"
+                        cancelText="Anulo"
+                        okButtonProps={{ danger: true, loading: deletingId === (orar.ORAR_ID ?? orar.id ?? orar.ID) }}
+                        onConfirm={() => handleDelete(orar.ORAR_ID ?? orar.id ?? orar.ID)}
+                      >
+                        <Button danger icon={<DeleteOutlined />}>
+                          Fshi
+                        </Button>
+                      </Popconfirm>
+                    )}
                     <Button icon={<CloseOutlined />} onClick={() => setDrawerOpen(false)}>
                       Mbyll
                     </Button>

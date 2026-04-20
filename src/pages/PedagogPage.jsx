@@ -68,7 +68,7 @@ function getDepartamentEmri(dep_id) {
 
 export default function PedagogPage() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const avatarLetter = user?.first_name?.[0]?.toUpperCase() ?? '?';
   const fullName = `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
 
@@ -299,19 +299,23 @@ export default function PedagogPage() {
           <Button size="small" onClick={() => openDetail(record)}>
             Shiko Detajet
           </Button>
-          <Button size="small" type="primary" ghost onClick={() => openEdit(record)}>
-            Edito
-          </Button>
-          <Popconfirm
-            title="A jeni i sigurt që doni të fshini këtë pedagog?"
-            okText="Po, fshi"
-            cancelText="Anulo"
-            onConfirm={() => handleDelete(record)}
-          >
-            <Button size="small" danger>
-              Fshi
+          {isAdmin && (
+            <Button size="small" type="primary" ghost onClick={() => openEdit(record)}>
+              Edito
             </Button>
-          </Popconfirm>
+          )}
+          {isAdmin && (
+            <Popconfirm
+              title="A jeni i sigurt që doni të fshini këtë pedagog?"
+              okText="Po, fshi"
+              cancelText="Anulo"
+              onConfirm={() => handleDelete(record)}
+            >
+              <Button size="small" danger>
+                Fshi
+              </Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -398,9 +402,11 @@ export default function PedagogPage() {
         <Card
           title={<Title level={5} style={{ margin: 0 }}>Lista e Pedagogëve</Title>}
           extra={
-            <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-              Shto Pedagog të Ri
-            </Button>
+            isAdmin && (
+              <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+                Shto Pedagog të Ri
+              </Button>
+            )
           }
         >
           <Table

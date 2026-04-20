@@ -66,5 +66,7 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const ctx = useContext(AuthContext);
+  const isAdmin = ctx.user?.PERD_TIPI === 'admin';
+  return { ...ctx, isAdmin };
 }

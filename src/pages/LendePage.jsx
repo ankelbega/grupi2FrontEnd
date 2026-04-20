@@ -8,6 +8,7 @@ import {
   EyeOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { getLende, getLendeById, createLende, updateLende, deleteLende, getPedagogetELendes } from '../api/lendeApi';
 import { VITET } from '../config/constants';
 
@@ -27,6 +28,7 @@ const depName = (id) => DEPARTAMENTET.find((d) => d.id === Number(id))?.name ?? 
 
 export default function LendePage() {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [lende, setLende] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -189,23 +191,27 @@ export default function LendePage() {
           >
             Shiko
           </Button>
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdito(record)}
-          >
-            Edito
-          </Button>
-          <Popconfirm
-            title="A jeni i sigurt që doni të fshini këtë lëndë?"
-            onConfirm={() => handleFshi(record)}
-            okText="Po, fshi"
-            cancelText="Anulo"
-          >
-            <Button size="small" danger icon={<DeleteOutlined />}>
-              Fshi
+          {isAdmin && (
+            <Button
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => handleEdito(record)}
+            >
+              Edito
             </Button>
-          </Popconfirm>
+          )}
+          {isAdmin && (
+            <Popconfirm
+              title="A jeni i sigurt që doni të fshini këtë lëndë?"
+              onConfirm={() => handleFshi(record)}
+              okText="Po, fshi"
+              cancelText="Anulo"
+            >
+              <Button size="small" danger icon={<DeleteOutlined />}>
+                Fshi
+              </Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -294,11 +300,13 @@ export default function LendePage() {
                 </Button>
               </Space>
             </Col>
-            <Col flex="auto" style={{ textAlign: 'right' }}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleShto}>
-                Shto Lëndë të Re
-              </Button>
-            </Col>
+            {isAdmin && (
+              <Col flex="auto" style={{ textAlign: 'right' }}>
+                <Button type="primary" icon={<PlusOutlined />} onClick={handleShto}>
+                  Shto Lëndë të Re
+                </Button>
+              </Col>
+            )}
           </Row>
         </Card>
 

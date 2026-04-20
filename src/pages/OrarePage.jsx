@@ -81,7 +81,7 @@ function getSallaName(o) {
 
 export default function OrarePage() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, isAdmin } = useAuth();
 
   const [orare, setOrare] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -237,15 +237,19 @@ export default function OrarePage() {
       title: 'Veprime',
       render: (_, o) => (
         <Space>
-          <Button
-            size="small"
-            onClick={() => navigate(`/orare/${o.ORAR_ID}/edito`)}
-          >
-            Edito
-          </Button>
-          <Button size="small" danger onClick={() => handleDelete(o)}>
-            Fshi
-          </Button>
+          {isAdmin && (
+            <Button
+              size="small"
+              onClick={() => navigate(`/orare/${o.ORAR_ID}/edito`)}
+            >
+              Edito
+            </Button>
+          )}
+          {isAdmin && (
+            <Button size="small" danger onClick={() => handleDelete(o)}>
+              Fshi
+            </Button>
+          )}
         </Space>
       ),
     },
@@ -266,13 +270,15 @@ export default function OrarePage() {
           Menaxhimi i Orareve
         </Title>
         <Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/orare/shto')}
-          >
-            Shto Orar te Ri
-          </Button>
+          {isAdmin && (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/orare/shto')}
+            >
+              Shto Orar te Ri
+            </Button>
+          )}
           <Button
             type="text"
             icon={<LogoutOutlined />}

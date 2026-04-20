@@ -8,6 +8,7 @@ import {
   EyeOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   getPrograme, getProgramiById, createProgram, updateProgram,
   deleteProgram, getLendeProgramit,
@@ -50,6 +51,7 @@ function groupLende(lende) {
 
 export default function ProgramStudimiPage() {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [programe, setPrograme] = useState([]);
   const [loading, setLoading]   = useState(false);
 
@@ -195,19 +197,23 @@ export default function ProgramStudimiPage() {
           <Button size="small" icon={<EyeOutlined />} onClick={() => handleShiko(record)}>
             Shiko
           </Button>
-          <Button size="small" icon={<EditOutlined />} onClick={() => handleEdito(record)}>
-            Edito
-          </Button>
-          <Popconfirm
-            title="A jeni i sigurt që doni të fshini këtë program?"
-            onConfirm={() => handleFshi(record)}
-            okText="Po, fshi"
-            cancelText="Anulo"
-          >
-            <Button size="small" danger icon={<DeleteOutlined />}>
-              Fshi
+          {isAdmin && (
+            <Button size="small" icon={<EditOutlined />} onClick={() => handleEdito(record)}>
+              Edito
             </Button>
-          </Popconfirm>
+          )}
+          {isAdmin && (
+            <Popconfirm
+              title="A jeni i sigurt që doni të fshini këtë program?"
+              onConfirm={() => handleFshi(record)}
+              okText="Po, fshi"
+              cancelText="Anulo"
+            >
+              <Button size="small" danger icon={<DeleteOutlined />}>
+                Fshi
+              </Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
@@ -279,11 +285,13 @@ export default function ProgramStudimiPage() {
                 </Button>
               </Space>
             </Col>
-            <Col flex="auto" style={{ textAlign: 'right' }}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleShto}>
-                Shto Program të Ri
-              </Button>
-            </Col>
+            {isAdmin && (
+              <Col flex="auto" style={{ textAlign: 'right' }}>
+                <Button type="primary" icon={<PlusOutlined />} onClick={handleShto}>
+                  Shto Program të Ri
+                </Button>
+              </Col>
+            )}
           </Row>
         </Card>
 
