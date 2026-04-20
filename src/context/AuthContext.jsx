@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../api/axios';
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -10,6 +10,9 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) setUser(JSON.parse(savedUser));
+
     const storedToken = localStorage.getItem('auth_token');
     if (storedToken) {
       api
@@ -22,7 +25,7 @@ export function AuthProvider({ children }) {
         .catch((err) => {
           if (err.response && err.response.status === 401) {
             localStorage.removeItem('auth_token');
-            localStorage.removeItem('auth_user');
+            localStorage.removeItem('user');
             setUser(null);
             setToken(null);
             setIsAuthenticated(false);
@@ -38,7 +41,7 @@ export function AuthProvider({ children }) {
 
   const login = (userData, tokenString) => {
     localStorage.setItem('auth_token', tokenString);
-    localStorage.setItem('auth_user', JSON.stringify(userData));
+    localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     setToken(tokenString);
     setIsAuthenticated(true);
@@ -51,7 +54,7 @@ export function AuthProvider({ children }) {
       // best effort
     }
     localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    localStorage.removeItem('user');
     setUser(null);
     setToken(null);
     setIsAuthenticated(false);
@@ -67,6 +70,8 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  const isAdmin = ctx.user?.PERD_TIPI === 'admin';
-  return { ...ctx, isAdmin };
+  const isAdmin = ctx.user?.tipi === 'admin';
+  const isPedagog = ctx.user?.tipi === 'pedagog';
+  const isStudent = ctx.user?.tipi === 'student';
+  return { ...ctx, isAdmin, isPedagog, isStudent };
 }
