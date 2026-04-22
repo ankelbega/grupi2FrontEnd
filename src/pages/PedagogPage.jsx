@@ -95,8 +95,6 @@ export default function PedagogPage() {
   const [editingPedagog, setEditingPedagog] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [form] = Form.useForm();
-  const [perd_emer, setPerdEmer] = useState('');
-  const [perd_mbiemer, setPerdMbiemer] = useState('');
 
   useEffect(() => {
     fetchPedagoget();
@@ -187,18 +185,15 @@ export default function PedagogPage() {
   function openCreate() {
     setEditingPedagog(null);
     form.resetFields();
-    setPerdEmer('');
-    setPerdMbiemer('');
     setFormVisible(true);
   }
 
   function openEdit(record) {
     setEditingPedagog(record);
-    setPerdEmer(record.PERD_EMER ?? '');
-    setPerdMbiemer(record.PERD_MBIEMER ?? '');
     form.setFieldsValue({
       PERD_EMER: record.PERD_EMER ?? '',
       PERD_MBIEMER: record.PERD_MBIEMER ?? '',
+      PERD_EMAIL: record.PERD_EMAIL ?? '',
       DEP_ID: record.DEP_ID ?? record.dep_id,
       PED_KOD: record.PED_KOD,
       PED_SPECIALIZIM: record.PED_SPECIALIZIM,
@@ -218,12 +213,13 @@ export default function PedagogPage() {
     const payload = {
       ...values,
       PERD_ID: null,
-      PERD_EMER: perd_emer,
-      PERD_MBIEMER: perd_mbiemer,
       PED_DATA_PUNESIMIT: values.PED_DATA_PUNESIMIT
         ? values.PED_DATA_PUNESIMIT.format('YYYY-MM-DD')
         : undefined,
     };
+    if (editingPedagog) {
+      delete payload.PERD_FJKALIM;
+    }
     setFormLoading(true);
     try {
       if (editingPedagog) {
@@ -267,7 +263,9 @@ export default function PedagogPage() {
       title: 'Emri i Plotë',
       key: 'emri',
       render: (_, r) =>
-        `${r.PERD_EMER ?? r.emri ?? ''} ${r.PERD_MBIEMER ?? r.mbiemer ?? ''}`.trim() || '—',
+        r.PERD_EMER
+          ? `${r.PERD_EMER} ${r.PERD_MBIEMER ?? ''}`.trim()
+          : r.PED_KOD ?? '—',
     },
     {
       title: 'Specializimi',
@@ -569,7 +567,7 @@ export default function PedagogPage() {
         open={formVisible}
         onCancel={() => setFormVisible(false)}
         footer={null}
-        width={560}
+        width={600}
         destroyOnClose
       >
         <Form
@@ -578,6 +576,10 @@ export default function PedagogPage() {
           onFinish={handleFormSubmit}
           style={{ marginTop: 8 }}
         >
+          <Divider orientation="left" orientationMargin={0}>
+            Te dhenat e llogarise
+          </Divider>
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -585,10 +587,7 @@ export default function PedagogPage() {
                 label="Emri"
                 rules={[{ required: true, message: 'Emri është i detyrueshëm.' }]}
               >
-                <Input
-                  placeholder="p.sh. Arben"
-                  onChange={(e) => setPerdEmer(e.target.value)}
-                />
+                <Input placeholder="p.sh. Arben" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -597,13 +596,43 @@ export default function PedagogPage() {
                 label="Mbiemri"
                 rules={[{ required: true, message: 'Mbiemri është i detyrueshëm.' }]}
               >
-                <Input
-                  placeholder="p.sh. Krasniqi"
-                  onChange={(e) => setPerdMbiemer(e.target.value)}
-                />
+                <Input placeholder="p.sh. Krasniqi" />
               </Form.Item>
             </Col>
           </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="PERD_EMAIL"
+                label="Email"
+                rules={[
+                  { required: true, message: 'Email është i detyrueshëm.' },
+                  { type: 'email', message: 'Vendosni një email të vlefshëm.' },
+                ]}
+              >
+                <Input placeholder="p.sh. arben@email.com" />
+              </Form.Item>
+            </Col>
+            {!editingPedagog && (
+              <Col span={12}>
+                <Form.Item
+                  name="PERD_FJKALIM"
+                  label="Fjalekalimi"
+                  rules={[
+                    { required: true, message: 'Fjalëkalimi është i detyrueshëm.' },
+                    { min: 6, message: 'Fjalëkalimi duhet të ketë të paktën 6 karaktere.' },
+                  ]}
+                >
+                  <Input.Password placeholder="Min. 6 karaktere" />
+                </Form.Item>
+              </Col>
+            )}
+          </Row>
+
+          <Divider orientation="left" orientationMargin={0}>
+            Te dhenat e pedagogut
+          </Divider>
 
           <Row gutter={16}>
             <Col span={12}>
