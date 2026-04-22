@@ -73,13 +73,6 @@ export default function Dashboard() {
                 </Card>
               </Col>
               <Col xs={24} sm={12}>
-                <Card hoverable style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => navigate('/orare')}>
-                  <CalendarOutlined style={{ fontSize: 32, color: '#fa8c16', marginBottom: 8 }} />
-                  <Title level={5} style={{ margin: 0 }}>Menaxho Oraret</Title>
-                  <Text type="secondary">Shiko dhe shto orare mësimore</Text>
-                </Card>
-              </Col>
-              <Col xs={24} sm={12}>
                 <Card hoverable style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => navigate('/orare/kalendar')}>
                   <CalendarOutlined style={{ fontSize: 32, color: '#eb2f96', marginBottom: 8 }} />
                   <Title level={5} style={{ margin: 0 }}>Kalendari i Orareve</Title>

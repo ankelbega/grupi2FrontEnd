@@ -6,7 +6,6 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import OrarKalendarPage from './pages/OrarKalendarPage';
 import OrarFormPage from './pages/OrarFormPage';
-import OrarePage from './pages/OrarePage';
 import PedagogPage from './pages/PedagogPage';
 import LendePage from './pages/LendePage';
 import ProgramStudimiPage from './pages/ProgramStudimiPage';
@@ -33,8 +32,7 @@ export default function App() {
           <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/orare" element={<OrarePage />} />
-            <Route path="/orare/kalendar" element={<OrarKalendarPage />} />
+<Route path="/orare/kalendar" element={<OrarKalendarPage />} />
             <Route path="/orare/shto" element={<OrarFormPage />} />
             <Route path="/orare/edito/:id" element={<OrarFormPage />} />
             <Route path="/pedagoget" element={<PedagogPage />} />
