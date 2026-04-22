@@ -38,7 +38,14 @@ import {
   updatePedagog,
   deletePedagog,
 } from '../api/pedagogApi';
-import { SEMESTRAT } from '../config/constants';
+const SEMESTRAT_OPTIONS = [
+  { label: 'Semestri 1', value: 0 },
+  { label: 'Semestri 2', value: 1 },
+  { label: 'Semestri 3', value: 2 },
+  { label: 'Semestri 4', value: 3 },
+  { label: 'Semestri 5', value: 4 },
+  { label: 'Semestri 6', value: 5 },
+];
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -75,6 +82,7 @@ export default function PedagogPage() {
   // Filter state
   const [filterDep, setFilterDep] = useState(null);
   const [filterKontrata, setFilterKontrata] = useState(null);
+  const [searchText, setSearchText] = useState('');
 
   // Table state
   const [pedagoget, setPedagoget] = useState([]);
@@ -123,6 +131,7 @@ export default function PedagogPage() {
   function handlePastro() {
     setFilterDep(null);
     setFilterKontrata(null);
+    setSearchText('');
     fetchPedagoget();
   }
 
@@ -137,18 +146,25 @@ export default function PedagogPage() {
   }
 
   async function handleNgarkoLende() {
-    if (!semId) {
-      message.warning('Zgjidhni semestrin para se të ngarkoni lëndet.');
+    if (!semId && semId !== 0) {
+      message.warning('Ju lutem zgjidhni semestrin fillimisht');
       return;
     }
     setLendeLoading(true);
     try {
-      const res = await getPedagogLende(selectedPedagog.PED_ID ?? selectedPedagog.id, semId);
+      const semIdToSend = semId;
+      const res = await getPedagogLende(selectedPedagog.PED_ID, semIdToSend);
       const data = res.data?.data ?? res.data ?? [];
-      setLende(Array.isArray(data) ? data : []);
+      const lendePlotë = Array.isArray(data) ? data : [];
+      setLende(lendePlotë);
       setOrariVisible(false);
+      if (lendePlotë.length > 0) {
+        message.success(`U ngarkuan ${lendePlotë.length} lëndë për këtë semestër`);
+      } else {
+        message.warning('Ky pedagog nuk ka lëndë të caktuara për semestrin e zgjedhur');
+      }
     } catch {
-      message.error('Gabim gjatë ngarkimit të lëndëve.');
+      message.error('Gabim gjatë ngarkimit të lëndëve');
     } finally {
       setLendeLoading(false);
     }
@@ -157,12 +173,19 @@ export default function PedagogPage() {
   async function handleShikoOrarin() {
     setOrariLoading(true);
     try {
-      const res = await getPedagogOrari(selectedPedagog.PED_ID ?? selectedPedagog.id, semId);
+      const semIdToSend = semId;
+      const res = await getPedagogOrari(selectedPedagog.PED_ID, semIdToSend);
       const data = res.data?.data ?? res.data ?? [];
-      setOrari(Array.isArray(data) ? data : []);
+      const orariPlotë = Array.isArray(data) ? data : [];
+      setOrari(orariPlotë);
       setOrariVisible(true);
+      if (orariPlotë.length > 0) {
+        message.success(`U ngarkua orari me ${orariPlotë.length} orë mësimore`);
+      } else {
+        message.warning('Ky pedagog nuk ka orar të regjistruar');
+      }
     } catch {
-      message.error('Gabim gjatë ngarkimit të orarit.');
+      message.error('Gabim gjatë ngarkimit të orarit');
     } finally {
       setOrariLoading(false);
     }
@@ -319,6 +342,13 @@ export default function PedagogPage() {
     },
   ];
 
+  const filteredPedag = pedagoget.filter((p) => {
+    if (!searchText) return true;
+    const emri = `${p.PERD_EMER ?? ''} ${p.PERD_MBIEMER ?? ''}`.toLowerCase();
+    const kod = (p.PED_KOD ?? '').toLowerCase();
+    return emri.includes(searchText.toLowerCase()) || kod.includes(searchText.toLowerCase());
+  });
+
   const orariGrid = buildOrariGrid();
 
   return (
@@ -387,6 +417,14 @@ export default function PedagogPage() {
               <Option value="kohe-pjesshme">Kohë-pjesshme</Option>
             </Select>
 
+            <Input
+              placeholder="Kërko me emër ose mbiemër..."
+              style={{ width: 260 }}
+              allowClear
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+
             <Button type="primary" icon={<SearchOutlined />} onClick={handleKerko}>
               Kërko
             </Button>
@@ -410,7 +448,7 @@ export default function PedagogPage() {
           <Table
             rowKey={(r) => r.PED_ID ?? r.id ?? r.PED_KOD}
             columns={columns}
-            dataSource={pedagoget}
+            dataSource={filteredPedag}
             loading={tableLoading}
             pagination={{ pageSize: 10 }}
             scroll={{ x: 800 }}
@@ -460,9 +498,9 @@ export default function PedagogPage() {
                 value={semId}
                 onChange={setSemId}
               >
-                {SEMESTRAT.map((s) => (
-                  <Option key={s.SEM_ID} value={s.SEM_ID}>
-                    {s.SEM_EM}
+                {SEMESTRAT_OPTIONS.map((s) => (
+                  <Option key={s.value} value={s.value}>
+                    {s.label}
                   </Option>
                 ))}
               </Select>
