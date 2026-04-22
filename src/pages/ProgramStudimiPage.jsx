@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
   Layout, Card, Typography, Table, Button, Space, Modal, Form,
-  Input, InputNumber, Select, Tag, Popconfirm, message, Row, Col, Divider, List,
+  Input, InputNumber, Select, Tag, Popconfirm, message, Row, Col, Divider, List, Tooltip, Badge,
 } from 'antd';
 import {
   PlusOutlined, SearchOutlined, ClearOutlined,
-  EyeOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined,
+  EyeOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined, BankOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -32,9 +32,15 @@ const NIVELET = [
   { value: 'Doktorature', label: 'Doktoraturë', color: 'purple' },
 ];
 
-const niveliColor = (niv) => NIVELET.find((n) => n.value === niv)?.color ?? 'default';
-const niveliLabel = (niv) => NIVELET.find((n) => n.value === niv)?.label ?? niv ?? '-';
-const depName     = (id)  => DEPARTAMENTET.find((d) => d.id === Number(id))?.name ?? `Dep ${id}`;
+const niveliColor     = (niv) => NIVELET.find((n) => n.value === niv)?.color ?? 'default';
+const niveliLabel     = (niv) => NIVELET.find((n) => n.value === niv)?.label ?? niv ?? '-';
+const depName         = (id)  => DEPARTAMENTET.find((d) => d.id === Number(id))?.name ?? `Dep ${id}`;
+const niveliClassName = (niv) => {
+  if (niv === 'Bachelor')    return 'tag-bachelor';
+  if (niv === 'Master')      return 'tag-master';
+  if (niv === 'Doktorature') return 'tag-doktorature';
+  return '';
+};
 
 // Group lende list by viti then semestri
 function groupLende(lende) {
@@ -180,7 +186,7 @@ export default function ProgramStudimiPage() {
       key: 'PROG_NIV',
       render: (val, rec) => {
         const niv = val ?? rec.niveli;
-        return <Tag color={niveliColor(niv)}>{niveliLabel(niv)}</Tag>;
+        return <Tag color={niveliColor(niv)} className={niveliClassName(niv)}>{niveliLabel(niv)}</Tag>;
       },
     },
     {
@@ -194,13 +200,13 @@ export default function ProgramStudimiPage() {
       key: 'veprime',
       render: (_, record) => (
         <Space>
-          <Button size="small" icon={<EyeOutlined />} onClick={() => handleShiko(record)}>
-            Shiko
-          </Button>
+          <Tooltip title="Shiko">
+            <Button size="small" icon={<EyeOutlined />} onClick={() => handleShiko(record)} />
+          </Tooltip>
           {isAdmin && (
-            <Button size="small" icon={<EditOutlined />} onClick={() => handleEdito(record)}>
-              Edito
-            </Button>
+            <Tooltip title="Edito">
+              <Button size="small" icon={<EditOutlined />} onClick={() => handleEdito(record)} />
+            </Tooltip>
           )}
           {isAdmin && (
             <Popconfirm
@@ -209,9 +215,7 @@ export default function ProgramStudimiPage() {
               okText="Po, fshi"
               cancelText="Anulo"
             >
-              <Button size="small" danger icon={<DeleteOutlined />}>
-                Fshi
-              </Button>
+              <Button size="small" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           )}
         </Space>
@@ -229,17 +233,21 @@ export default function ProgramStudimiPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: '#001529',
+          background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5986 100%)',
           padding: '0 24px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         }}
       >
-        <Space>
+        <Space align="center" size={10}>
           <Button
             type="text"
             icon={<ArrowLeftOutlined />}
             style={{ color: '#fff' }}
             onClick={() => navigate('/dashboard')}
           />
+          <div style={{ width: 32, height: 32, borderRadius: 7, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BankOutlined style={{ color: '#fff', fontSize: 18 }} />
+          </div>
           <Title level={4} style={{ color: '#fff', margin: 0 }}>
             Menaxhimi i Programeve të Studimit
           </Title>
@@ -248,7 +256,7 @@ export default function ProgramStudimiPage() {
 
       <Content style={{ padding: '24px' }}>
         {/* Filter bar */}
-        <Card style={{ marginBottom: 16 }}>
+        <Card style={{ marginBottom: 16, borderRadius: 12, background: 'linear-gradient(135deg, #f8faff 0%, #eef2f8 100%)', border: '1px solid #d0d9e8', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
           <Row gutter={[12, 12]} align="middle">
             <Col xs={24} sm={12} md={5}>
               <Select
@@ -296,8 +304,17 @@ export default function ProgramStudimiPage() {
         </Card>
 
         {/* Table */}
-        <Card>
+        <Card
+          title={
+            <Space>
+              <span style={{ fontWeight: 600 }}>Programet e Studimit</span>
+              <Badge count={programe.length} showZero style={{ backgroundColor: '#1e3a5f' }} />
+            </Space>
+          }
+          style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+        >
           <Table
+            className="uni-table"
             rowKey={(r) => r.id ?? r.PROG_ID ?? r.PROG_EM}
             dataSource={programe}
             columns={columns}
@@ -310,6 +327,7 @@ export default function ProgramStudimiPage() {
 
       {/* Create / Edit Modal */}
       <Modal
+        className="uni-modal"
         title={editRecord ? 'Edito Programin' : 'Shto Program të Ri'}
         open={modalFormOpen}
         onCancel={() => setModalFormOpen(false)}
@@ -363,6 +381,7 @@ export default function ProgramStudimiPage() {
 
       {/* View Modal */}
       <Modal
+        className="uni-modal"
         title="Detajet e Programit"
         open={modalViewOpen}
         onCancel={() => setModalViewOpen(false)}
@@ -380,7 +399,10 @@ export default function ProgramStudimiPage() {
               <Text><strong>Emri:</strong> {viewRecord.PROG_EM ?? viewRecord.emri ?? '-'}</Text>
               <Text>
                 <strong>Niveli:</strong>{' '}
-                <Tag color={niveliColor(viewRecord.PROG_NIV ?? viewRecord.niveli)}>
+                <Tag
+                  color={niveliColor(viewRecord.PROG_NIV ?? viewRecord.niveli)}
+                  className={niveliClassName(viewRecord.PROG_NIV ?? viewRecord.niveli)}
+                >
                   {niveliLabel(viewRecord.PROG_NIV ?? viewRecord.niveli)}
                 </Tag>
               </Text>

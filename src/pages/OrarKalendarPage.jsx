@@ -203,13 +203,13 @@ export default function OrarKalendarPage() {
   };
 
   const headerCellStyle = {
-    background: '#e6f4ff',
-    border: '1px solid #d0e8ff',
-    padding: '8px 12px',
+    background: '#1e3a5f',
+    border: '1px solid #162d4a',
+    padding: '10px 12px',
     textAlign: 'center',
     fontWeight: 700,
     fontSize: 13,
-    color: '#1677ff',
+    color: '#fff',
     minWidth: 130,
   };
 
@@ -227,18 +227,21 @@ export default function OrarKalendarPage() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
+    <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
       <Header
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: '#001529',
+          background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5986 100%)',
           padding: '0 24px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         }}
       >
-        <Space>
-          <CalendarOutlined style={{ color: '#1677ff', fontSize: 20 }} />
+        <Space align="center" size={10}>
+          <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CalendarOutlined style={{ color: '#fff', fontSize: 20 }} />
+          </div>
           <Title level={4} style={{ color: '#fff', margin: 0 }}>
             Kalendari i Orareve
           </Title>
@@ -263,7 +266,16 @@ export default function OrarKalendarPage() {
 
       <Content style={{ padding: '24px' }}>
         {/* FILTER BAR */}
-        <Card style={{ marginBottom: 16, borderRadius: 8 }} bodyStyle={{ padding: '16px 20px' }}>
+        <Card
+          style={{
+            marginBottom: 16,
+            borderRadius: 12,
+            background: 'linear-gradient(135deg, #f8faff 0%, #eef2f8 100%)',
+            border: '1px solid #d0d9e8',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          }}
+          bodyStyle={{ padding: '16px 20px' }}
+        >
           <Row gutter={[12, 12]} align="middle">
             <Col>
               <Select
@@ -361,7 +373,7 @@ export default function OrarKalendarPage() {
         </Card>
 
         {/* CALENDAR GRID */}
-        <Card style={{ borderRadius: 8, marginBottom: 16 }} bodyStyle={{ padding: 0, overflowX: 'auto' }}>
+        <Card style={{ borderRadius: 12, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} bodyStyle={{ padding: 0, overflowX: 'auto' }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: 80 }}>
               <Spin size="large" tip="Duke ngarkuar oraret..." />
@@ -380,7 +392,7 @@ export default function OrarKalendarPage() {
               </colgroup>
               <thead>
                 <tr>
-                  <th style={{ ...timeCellStyle, background: '#f0f0f0', border: '1px solid #d9d9d9' }}></th>
+                  <th style={{ ...timeCellStyle, background: '#162d4a', border: '1px solid #162d4a', color: '#fff' }}></th>
                   {DAYS.map((d) => (
                     <th key={d.key} style={headerCellStyle}>
                       {d.label}
@@ -523,42 +535,54 @@ export default function OrarKalendarPage() {
         {/* STATS BAR */}
         <Row gutter={16}>
           <Col xs={24} sm={12} md={6}>
-            <Card style={{ borderRadius: 8, textAlign: 'center' }} bodyStyle={{ padding: '16px 20px' }}>
+            <Card
+              style={{ borderRadius: 12, textAlign: 'center', background: 'linear-gradient(135deg, #1677ff, #4096ff)', border: 'none', boxShadow: '0 4px 12px rgba(22,119,255,0.3)' }}
+              bodyStyle={{ padding: '20px' }}
+            >
               <Statistic
-                title="Totali i Orareve"
+                title={<span style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>Totali i Orareve</span>}
                 value={totalOrare}
-                prefix={<CalendarOutlined style={{ color: '#1677ff' }} />}
-                valueStyle={{ color: '#1677ff', fontSize: 28 }}
+                prefix={<CalendarOutlined style={{ color: '#fff' }} />}
+                valueStyle={{ color: '#fff', fontSize: 28, fontWeight: 700 }}
               />
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Card style={{ borderRadius: 8, textAlign: 'center' }} bodyStyle={{ padding: '16px 20px' }}>
+            <Card
+              style={{ borderRadius: 12, textAlign: 'center', background: 'linear-gradient(135deg, #52c41a, #73d13d)', border: 'none', boxShadow: '0 4px 12px rgba(82,196,26,0.3)' }}
+              bodyStyle={{ padding: '20px' }}
+            >
               <Statistic
-                title="Pedagogët Aktivë"
+                title={<span style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>Pedagogët Aktivë</span>}
                 value={uniquePedag}
-                prefix={<UserOutlined style={{ color: '#52c41a' }} />}
-                valueStyle={{ color: '#52c41a', fontSize: 28 }}
+                prefix={<UserOutlined style={{ color: '#fff' }} />}
+                valueStyle={{ color: '#fff', fontSize: 28, fontWeight: 700 }}
               />
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Card style={{ borderRadius: 8, textAlign: 'center' }} bodyStyle={{ padding: '16px 20px' }}>
+            <Card
+              style={{ borderRadius: 12, textAlign: 'center', background: 'linear-gradient(135deg, #fa8c16, #ffa940)', border: 'none', boxShadow: '0 4px 12px rgba(250,140,22,0.3)' }}
+              bodyStyle={{ padding: '20px' }}
+            >
               <Statistic
-                title="Sallet në Përdorim"
+                title={<span style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>Sallet në Përdorim</span>}
                 value={uniqueSalla}
-                prefix={<HomeOutlined style={{ color: '#fa8c16' }} />}
-                valueStyle={{ color: '#fa8c16', fontSize: 28 }}
+                prefix={<HomeOutlined style={{ color: '#fff' }} />}
+                valueStyle={{ color: '#fff', fontSize: 28, fontWeight: 700 }}
               />
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Card style={{ borderRadius: 8, textAlign: 'center' }} bodyStyle={{ padding: '16px 20px' }}>
+            <Card
+              style={{ borderRadius: 12, textAlign: 'center', background: 'linear-gradient(135deg, #eb2f96, #ff85c2)', border: 'none', boxShadow: '0 4px 12px rgba(235,47,150,0.3)' }}
+              bodyStyle={{ padding: '20px' }}
+            >
               <Statistic
-                title="Orare Sot"
+                title={<span style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>Orare Sot</span>}
                 value={orareSOt}
-                prefix={<ClockCircleOutlined style={{ color: '#eb2f96' }} />}
-                valueStyle={{ color: '#eb2f96', fontSize: 28 }}
+                prefix={<ClockCircleOutlined style={{ color: '#fff' }} />}
+                valueStyle={{ color: '#fff', fontSize: 28, fontWeight: 700 }}
               />
             </Card>
           </Col>

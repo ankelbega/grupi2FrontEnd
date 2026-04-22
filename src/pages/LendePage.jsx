@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
   Layout, Card, Typography, Table, Button, Space, Modal, Form,
-  Input, Select, Tag, Popconfirm, message, Row, Col, Divider, List, Avatar,
+  Input, Select, Tag, Popconfirm, message, Row, Col, Divider, List, Avatar, Tooltip, Badge,
 } from 'antd';
 import {
   PlusOutlined, SearchOutlined, ClearOutlined,
-  EyeOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined,
+  EyeOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined, BankOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -184,21 +184,21 @@ export default function LendePage() {
       key: 'veprime',
       render: (_, record) => (
         <Space>
-          <Button
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => handleShiko(record)}
-          >
-            Shiko
-          </Button>
-          {isAdmin && (
+          <Tooltip title="Shiko">
             <Button
               size="small"
-              icon={<EditOutlined />}
-              onClick={() => handleEdito(record)}
-            >
-              Edito
-            </Button>
+              icon={<EyeOutlined />}
+              onClick={() => handleShiko(record)}
+            />
+          </Tooltip>
+          {isAdmin && (
+            <Tooltip title="Edito">
+              <Button
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => handleEdito(record)}
+              />
+            </Tooltip>
           )}
           {isAdmin && (
             <Popconfirm
@@ -207,9 +207,7 @@ export default function LendePage() {
               okText="Po, fshi"
               cancelText="Anulo"
             >
-              <Button size="small" danger icon={<DeleteOutlined />}>
-                Fshi
-              </Button>
+              <Button size="small" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           )}
         </Space>
@@ -225,17 +223,21 @@ export default function LendePage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: '#001529',
+          background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5986 100%)',
           padding: '0 24px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         }}
       >
-        <Space>
+        <Space align="center" size={10}>
           <Button
             type="text"
             icon={<ArrowLeftOutlined />}
             style={{ color: '#fff' }}
             onClick={() => navigate('/dashboard')}
           />
+          <div style={{ width: 32, height: 32, borderRadius: 7, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BankOutlined style={{ color: '#fff', fontSize: 18 }} />
+          </div>
           <Title level={4} style={{ color: '#fff', margin: 0 }}>
             Menaxhimi i Lëndëve
           </Title>
@@ -244,7 +246,7 @@ export default function LendePage() {
 
       <Content style={{ padding: '24px' }}>
         {/* Filter bar */}
-        <Card style={{ marginBottom: 16 }}>
+        <Card style={{ marginBottom: 16, borderRadius: 12, background: 'linear-gradient(135deg, #f8faff 0%, #eef2f8 100%)', border: '1px solid #d0d9e8', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
           <Row gutter={[12, 12]} align="middle">
             <Col xs={24} sm={12} md={4}>
               <Select
@@ -311,8 +313,17 @@ export default function LendePage() {
         </Card>
 
         {/* Table */}
-        <Card>
+        <Card
+          title={
+            <Space>
+              <span style={{ fontWeight: 600 }}>Lëndët</span>
+              <Badge count={displayLende.length} showZero style={{ backgroundColor: '#1e3a5f' }} />
+            </Space>
+          }
+          style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+        >
           <Table
+            className="uni-table"
             rowKey={(r) => r.id ?? r.LEN_ID ?? r.LEN_KOD}
             dataSource={displayLende}
             columns={columns}
@@ -325,6 +336,7 @@ export default function LendePage() {
 
       {/* Create / Edit Modal */}
       <Modal
+        className="uni-modal"
         title={editRecord ? 'Edito Lëndën' : 'Shto Lëndë të Re'}
         open={modalFormOpen}
         onCancel={() => setModalFormOpen(false)}
@@ -368,6 +380,7 @@ export default function LendePage() {
 
       {/* View Modal */}
       <Modal
+        className="uni-modal"
         title="Detajet e Lëndës"
         open={modalViewOpen}
         onCancel={() => setModalViewOpen(false)}

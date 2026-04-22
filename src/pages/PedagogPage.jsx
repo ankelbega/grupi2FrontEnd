@@ -19,6 +19,8 @@ import {
   Divider,
   Row,
   Col,
+  Tooltip,
+  Badge,
 } from 'antd';
 import {
   PlusOutlined,
@@ -26,6 +28,10 @@ import {
   ClearOutlined,
   LogoutOutlined,
   ArrowLeftOutlined,
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  BankOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -306,9 +312,10 @@ export default function PedagogPage() {
       render: (_, r) => {
         const k = r.PED_LLOJ_KONTRATE;
         if (!k) return '—';
-        const color = k === 'kohe-plote' ? 'green' : 'orange';
-        const label = k === 'kohe-plote' ? 'Kohë-plote' : 'Kohë-pjesshme';
-        return <Tag color={color}>{label}</Tag>;
+        const color     = k === 'kohe-plote' ? 'green' : 'orange';
+        const label     = k === 'kohe-plote' ? 'Kohë-plote' : 'Kohë-pjesshme';
+        const className = k === 'kohe-plote' ? 'tag-kohe-plote' : 'tag-kohe-pjesshme';
+        return <Tag color={color} className={className}>{label}</Tag>;
       },
     },
     {
@@ -317,13 +324,13 @@ export default function PedagogPage() {
       width: 260,
       render: (_, record) => (
         <Space size="small">
-          <Button size="small" onClick={() => openDetail(record)}>
-            Shiko Detajet
-          </Button>
+          <Tooltip title="Shiko Detajet">
+            <Button size="small" icon={<EyeOutlined />} onClick={() => openDetail(record)} />
+          </Tooltip>
           {isAdmin && (
-            <Button size="small" type="primary" ghost onClick={() => openEdit(record)}>
-              Edito
-            </Button>
+            <Tooltip title="Edito">
+              <Button size="small" type="primary" ghost icon={<EditOutlined />} onClick={() => openEdit(record)} />
+            </Tooltip>
           )}
           {isAdmin && (
             <Popconfirm
@@ -332,9 +339,7 @@ export default function PedagogPage() {
               cancelText="Anulo"
               onConfirm={() => handleDelete(record)}
             >
-              <Button size="small" danger>
-                Fshi
-              </Button>
+              <Button size="small" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           )}
         </Space>
@@ -358,17 +363,21 @@ export default function PedagogPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: '#001529',
+          background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5986 100%)',
           padding: '0 24px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         }}
       >
-        <Space>
+        <Space align="center" size={10}>
           <Button
             type="text"
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/dashboard')}
             style={{ color: '#fff' }}
           />
+          <div style={{ width: 32, height: 32, borderRadius: 7, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BankOutlined style={{ color: '#fff', fontSize: 18 }} />
+          </div>
           <Title level={4} style={{ color: '#fff', margin: 0 }}>
             Menaxhimi i Pedagogëve
           </Title>
@@ -389,7 +398,7 @@ export default function PedagogPage() {
 
       <Content style={{ padding: '24px' }}>
         {/* Filter Bar */}
-        <Card style={{ marginBottom: 16 }}>
+        <Card style={{ marginBottom: 16, borderRadius: 12, background: 'linear-gradient(135deg, #f8faff 0%, #eef2f8 100%)', border: '1px solid #d0d9e8', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
           <Space wrap>
             <Select
               placeholder="Filtro sipas Departamentit"
@@ -436,7 +445,12 @@ export default function PedagogPage() {
 
         {/* Table Card */}
         <Card
-          title={<Title level={5} style={{ margin: 0 }}>Lista e Pedagogëve</Title>}
+          title={
+            <Space>
+              <span style={{ fontWeight: 600 }}>Lista e Pedagogëve</span>
+              <Badge count={filteredPedag.length} showZero style={{ backgroundColor: '#1e3a5f' }} />
+            </Space>
+          }
           extra={
             isAdmin && (
               <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
@@ -444,8 +458,10 @@ export default function PedagogPage() {
               </Button>
             )
           }
+          style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
         >
           <Table
+            className="uni-table"
             rowKey={(r) => r.PED_ID ?? r.id ?? r.PED_KOD}
             columns={columns}
             dataSource={filteredPedag}
@@ -458,6 +474,7 @@ export default function PedagogPage() {
 
       {/* ── Detail Modal ── */}
       <Modal
+        className="uni-modal"
         title="Detajet e Pedagogut"
         open={detailVisible}
         onCancel={() => setDetailVisible(false)}
@@ -481,9 +498,9 @@ export default function PedagogPage() {
               </Descriptions.Item>
               <Descriptions.Item label="Kontrata">
                 {selectedPedagog.PED_LLOJ_KONTRATE === 'kohe-plote' ? (
-                  <Tag color="green">Kohë-plote</Tag>
+                  <Tag color="green" className="tag-kohe-plote">Kohë-plote</Tag>
                 ) : selectedPedagog.PED_LLOJ_KONTRATE === 'kohe-pjesshme' ? (
-                  <Tag color="orange">Kohë-pjesshme</Tag>
+                  <Tag color="orange" className="tag-kohe-pjesshme">Kohë-pjesshme</Tag>
                 ) : (
                   '—'
                 )}
@@ -601,6 +618,7 @@ export default function PedagogPage() {
 
       {/* ── Create / Edit Modal ── */}
       <Modal
+        className="uni-modal"
         title={editingPedagog ? 'Edito Pedagogun' : 'Shto Pedagog të Ri'}
         open={formVisible}
         onCancel={() => setFormVisible(false)}
