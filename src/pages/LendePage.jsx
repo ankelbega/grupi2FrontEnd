@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Layout, Card, Typography, Table, Button, Space, Modal, Form,
-  Input, Select, Tag, Popconfirm, message, Row, Col, Divider, List, Avatar, Tooltip, Badge,
+  Input, Select, Tag, Popconfirm, message, Row, Col, Divider, List, Avatar, Tooltip, Badge, Radio,
 } from 'antd';
 import {
   PlusOutlined, SearchOutlined, ClearOutlined,
@@ -71,11 +71,6 @@ export default function LendePage() {
     if (filterDep)  filters.dep_id   = filterDep;
     if (filterViti) filters.viti     = filterViti;
     if (filterSem)  filters.semestri = filterSem;
-    // Send zgjedhore to API only when LP_ZGJEDHORE is not present in current data
-    const hasZgj = lende.length > 0 && 'LP_ZGJEDHORE' in lende[0];
-    if (filterLloji && filterLloji !== 'te_gjitha' && !hasZgj) {
-      filters.zgjedhore = filterLloji === 'obligative' ? 0 : 1;
-    }
     fetchLende(filters);
   };
 
@@ -88,14 +83,11 @@ export default function LendePage() {
     fetchLende();
   };
 
-  // LP_ZGJEDHORE present in data → filter lloji client-side; otherwise API handled it
-  const hasZgjedhoreField = lende.length > 0 && 'LP_ZGJEDHORE' in lende[0];
-
   const displayLende = lende.filter((l) => {
     if (filterEmri && !(l.LEN_EM ?? '').toLowerCase().includes(filterEmri.toLowerCase())) return false;
-    if (filterLloji && filterLloji !== 'te_gjitha' && hasZgjedhoreField) {
-      if (filterLloji === 'obligative' && !(l.LP_ZGJEDHORE === false || l.LP_ZGJEDHORE === 0)) return false;
-      if (filterLloji === 'zgjedhore'  && !(l.LP_ZGJEDHORE === true  || l.LP_ZGJEDHORE === 1)) return false;
+    if (filterLloji && filterLloji !== 'te_gjitha') {
+      if (filterLloji === 'zgjedhore'  && !(l.LP_ZGJEDHORE == 1)) return false;
+      if (filterLloji === 'obligative' && !(l.LP_ZGJEDHORE == 0 || l.LP_ZGJEDHORE === null || l.LP_ZGJEDHORE === undefined)) return false;
     }
     return true;
   });
@@ -126,9 +118,10 @@ export default function LendePage() {
   const handleEdito = (record) => {
     setEditRecord(record);
     form.setFieldsValue({
-      LEN_EM:  record.LEN_EM  ?? record.emri,
-      LEN_KOD: record.LEN_KOD ?? record.kodi,
-      DEP_ID:  record.DEP_ID  ?? record.dep_id,
+      LEN_EM:        record.LEN_EM  ?? record.emri,
+      LEN_KOD:       record.LEN_KOD ?? record.kodi,
+      DEP_ID:        record.DEP_ID  ?? record.dep_id,
+      LP_ZGJEDHORE:  record.LP_ZGJEDHORE ?? 0,
     });
     setModalFormOpen(true);
   };
@@ -136,11 +129,12 @@ export default function LendePage() {
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
+      const payload = { ...values, LP_ZGJEDHORE: Number(values.LP_ZGJEDHORE ?? 0) };
       if (editRecord) {
-        await updateLende(editRecord.id ?? editRecord.LEN_ID, values);
+        await updateLende(editRecord.id ?? editRecord.LEN_ID, payload);
         message.success('Lënda u përditësua me sukses');
       } else {
-        await createLende(values);
+        await createLende(payload);
         message.success('Lënda u shtua me sukses');
       }
       setModalFormOpen(false);
@@ -188,6 +182,15 @@ export default function LendePage() {
         const id = val ?? rec.dep_id;
         return id ? <Tag color="blue">{depName(id)}</Tag> : '-';
       },
+    },
+    {
+      title: 'Lloji',
+      render: (_, record) => {
+        const zgjedhore = record.LP_ZGJEDHORE == 1 || record.LP_ZGJEDHORE === true;
+        return zgjedhore
+          ? <Tag color="purple">Zgjedhore</Tag>
+          : <Tag color="blue">Obligative</Tag>;
+      }
     },
     {
       title: 'Veprime',
@@ -383,6 +386,16 @@ export default function LendePage() {
             rules={[{ required: true, message: 'Ju lutem shkruani kodin e lëndës' }]}
           >
             <Input placeholder="p.sh. INF301" />
+          </Form.Item>
+          <Form.Item
+            label="Lloji i Lëndës"
+            name="LP_ZGJEDHORE"
+            initialValue={0}
+          >
+            <Radio.Group>
+              <Radio value={0}>Obligative</Radio>
+              <Radio value={1}>Zgjedhore</Radio>
+            </Radio.Group>
           </Form.Item>
           <Form.Item
             label="Departamenti"
