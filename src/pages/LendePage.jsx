@@ -37,6 +37,7 @@ export default function LendePage() {
   const [filterViti, setFilterViti]     = useState(null);
   const [filterSem, setFilterSem]       = useState(null);
   const [filterLloji, setFilterLloji]   = useState(null);
+  const [filterEmri, setFilterEmri]     = useState('');
 
   // Modals
   const [modalFormOpen, setModalFormOpen]   = useState(false);
@@ -67,9 +68,14 @@ export default function LendePage() {
   // ── Filter actions ─────────────────────────────────────────────────────────
   const handleKerko = () => {
     const filters = {};
-    if (filterDep)   filters.dep_id   = filterDep;
-    if (filterViti)  filters.viti     = filterViti;
-    if (filterSem)   filters.semestri = filterSem;
+    if (filterDep)  filters.dep_id   = filterDep;
+    if (filterViti) filters.viti     = filterViti;
+    if (filterSem)  filters.semestri = filterSem;
+    // Send zgjedhore to API only when LP_ZGJEDHORE is not present in current data
+    const hasZgj = lende.length > 0 && 'LP_ZGJEDHORE' in lende[0];
+    if (filterLloji && filterLloji !== 'te_gjitha' && !hasZgj) {
+      filters.zgjedhore = filterLloji === 'obligative' ? 0 : 1;
+    }
     fetchLende(filters);
   };
 
@@ -78,17 +84,21 @@ export default function LendePage() {
     setFilterViti(null);
     setFilterSem(null);
     setFilterLloji(null);
+    setFilterEmri('');
     fetchLende();
   };
 
-  // Client-side lloji filter (if backend doesn't support it)
-  const displayLende = filterLloji && filterLloji !== 'te_gjitha'
-    ? lende.filter((l) => {
-        if (filterLloji === 'obligative')  return l.LEN_LLOJI === 'Obligative'  || l.lloji === 'Obligative';
-        if (filterLloji === 'zgjedhore')   return l.LEN_LLOJI === 'Zgjedhore'   || l.lloji === 'Zgjedhore';
-        return true;
-      })
-    : lende;
+  // LP_ZGJEDHORE present in data → filter lloji client-side; otherwise API handled it
+  const hasZgjedhoreField = lende.length > 0 && 'LP_ZGJEDHORE' in lende[0];
+
+  const displayLende = lende.filter((l) => {
+    if (filterEmri && !(l.LEN_EM ?? '').toLowerCase().includes(filterEmri.toLowerCase())) return false;
+    if (filterLloji && filterLloji !== 'te_gjitha' && hasZgjedhoreField) {
+      if (filterLloji === 'obligative' && !(l.LP_ZGJEDHORE === false || l.LP_ZGJEDHORE === 0)) return false;
+      if (filterLloji === 'zgjedhore'  && !(l.LP_ZGJEDHORE === true  || l.LP_ZGJEDHORE === 1)) return false;
+    }
+    return true;
+  });
 
   // ── View modal ─────────────────────────────────────────────────────────────
   const handleShiko = async (record) => {
@@ -290,6 +300,15 @@ export default function LendePage() {
                   { value: 'obligative', label: 'Obligative' },
                   { value: 'zgjedhore',  label: 'Zgjedhore' },
                 ]}
+              />
+            </Col>
+            <Col xs={24} sm={12} md={5}>
+              <Input
+                placeholder="Kërko lëndën me emër..."
+                allowClear
+                style={{ width: '100%' }}
+                value={filterEmri}
+                onChange={(e) => setFilterEmri(e.target.value)}
               />
             </Col>
             <Col>

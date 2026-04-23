@@ -64,6 +64,7 @@ export default function ProgramStudimiPage() {
   // Filters
   const [filterDep,    setFilterDep]    = useState(null);
   const [filterNiveli, setFilterNiveli] = useState(null);
+  const [filterEmri,   setFilterEmri]   = useState('');
 
   // Modals
   const [modalFormOpen, setModalFormOpen] = useState(false);
@@ -102,8 +103,14 @@ export default function ProgramStudimiPage() {
   const handlePastro = () => {
     setFilterDep(null);
     setFilterNiveli(null);
+    setFilterEmri('');
     fetchPrograme();
   };
+
+  // Client-side emri filter
+  const displayPrograme = programe.filter((p) =>
+    !filterEmri || (p.PROG_EM ?? '').toLowerCase().includes(filterEmri.toLowerCase())
+  );
 
   // ── View modal ─────────────────────────────────────────────────────────────
   const handleShiko = async (record) => {
@@ -283,6 +290,15 @@ export default function ProgramStudimiPage() {
                 ]}
               />
             </Col>
+            <Col xs={24} sm={12} md={6}>
+              <Input
+                placeholder="Kërko programin me emër..."
+                allowClear
+                style={{ width: '100%' }}
+                value={filterEmri}
+                onChange={(e) => setFilterEmri(e.target.value)}
+              />
+            </Col>
             <Col>
               <Space>
                 <Button type="primary" icon={<SearchOutlined />} onClick={handleKerko}>
@@ -308,7 +324,7 @@ export default function ProgramStudimiPage() {
           title={
             <Space>
               <span style={{ fontWeight: 600 }}>Programet e Studimit</span>
-              <Badge count={programe.length} showZero style={{ backgroundColor: '#1e3a5f' }} />
+              <Badge count={displayPrograme.length} showZero style={{ backgroundColor: '#1e3a5f' }} />
             </Space>
           }
           style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
@@ -316,7 +332,7 @@ export default function ProgramStudimiPage() {
           <Table
             className="uni-table"
             rowKey={(r) => r.id ?? r.PROG_ID ?? r.PROG_EM}
-            dataSource={programe}
+            dataSource={displayPrograme}
             columns={columns}
             loading={loading}
             pagination={{ pageSize: 10, showSizeChanger: true }}
