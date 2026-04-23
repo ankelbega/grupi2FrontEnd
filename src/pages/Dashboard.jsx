@@ -1,10 +1,11 @@
-import { Layout, Card, Typography, Avatar, Button, Tag, Space, Row, Col } from 'antd';
+import { Layout, Card, Typography, Avatar, Button, Tag, Space, Row, Col, Switch } from 'antd';
 import {
   MailOutlined, LogoutOutlined, CalendarOutlined, TeamOutlined,
-  BookOutlined, ApartmentOutlined, BankOutlined,
+  BookOutlined, ApartmentOutlined, BankOutlined, SunOutlined, MoonOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -62,13 +63,14 @@ const NAV_CARDS = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   const roleColor = roleColors[user?.role] ?? 'default';
   const fullName = `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
   const avatarLetter = user?.first_name?.[0]?.toUpperCase() ?? '?';
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+    <Layout style={{ minHeight: '100vh' }}>
       <Header
         style={{
           display: 'flex',
@@ -92,6 +94,12 @@ export default function Dashboard() {
           <Title level={4} style={{ color: '#fff', margin: 0 }}>University MS</Title>
         </Space>
         <Space>
+          <Switch
+            checked={isDark}
+            onChange={toggleTheme}
+            checkedChildren={<MoonOutlined />}
+            unCheckedChildren={<SunOutlined />}
+          />
           <Avatar style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: '#fff', fontWeight: 700 }}>
             {avatarLetter}
           </Avatar>

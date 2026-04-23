@@ -28,7 +28,7 @@ body,
 body {
   color: var(--text);
   font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--bg);
+  background: inherit;
 }
 
 /* ── Layout ─────────────────────────────────────────────────── */
@@ -163,11 +163,7 @@ body {
 }
 
 .uni-table .ant-table-tbody > tr:nth-child(even) > td {
-  background: #fafafa;
-}
-
-.uni-table .ant-table-tbody > tr.ant-table-row:hover > td {
-  background: #e6f4ff !important;
+  background: inherit;
 }
 
 /* ── Tags ────────────────────────────────────────────────────── */

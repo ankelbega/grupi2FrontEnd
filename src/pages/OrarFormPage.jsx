@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Layout, Steps, Card, Button, Select, TimePicker, Form, Space,
-  Typography, Spin, message, Tag, Descriptions, Alert, Row, Col,
+  Typography, Spin, message, Tag, Descriptions, Alert, Row, Col, Switch,
 } from 'antd';
 import {
   CalendarOutlined, HomeOutlined, ClockCircleOutlined,
   ArrowLeftOutlined, CheckCircleOutlined, InfoCircleOutlined,
+  SunOutlined, MoonOutlined,
 } from '@ant-design/icons';
+import { useTheme } from '../context/ThemeContext';
 import dayjs from 'dayjs';
 import { getOrarById, createOrar, updateOrar } from '../api/orarApi';
 import { API_BASE, authHeaders, DAYS, SALLET, LLOJI_OPTIONS } from '../config/constants';
@@ -29,6 +31,7 @@ export default function OrarFormPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isEditMode = !!id;
+  const { isDark, toggleTheme } = useTheme();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [seksionet, setSeksionet] = useState([]);
@@ -160,14 +163,14 @@ export default function OrarFormPage() {
 
   if (loadingData) {
     return (
-      <Layout style={{ minHeight: '100vh', background: '#f5f7fa', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Layout style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Spin size="large" />
       </Layout>
     );
   }
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f7fa' }}>
+    <Layout style={{ minHeight: '100vh' }}>
       <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#001529', padding: '0 24px' }}>
         <Space>
           <CalendarOutlined style={{ color: '#1677ff', fontSize: 20 }} />
@@ -175,9 +178,17 @@ export default function OrarFormPage() {
             {isEditMode ? 'Edito Orarin' : 'Shto Orar te Ri'}
           </Title>
         </Space>
-        <Button type="link" icon={<ArrowLeftOutlined />} style={{ color: '#aaa' }} onClick={() => navigate('/orare/kalendar')}>
-          Kthehu
-        </Button>
+        <Space>
+          <Switch
+            checked={isDark}
+            onChange={toggleTheme}
+            checkedChildren={<MoonOutlined />}
+            unCheckedChildren={<SunOutlined />}
+          />
+          <Button type="link" icon={<ArrowLeftOutlined />} style={{ color: '#aaa' }} onClick={() => navigate('/orare/kalendar')}>
+            Kthehu
+          </Button>
+        </Space>
       </Header>
 
       <Content style={{ padding: '32px 24px', maxWidth: 720, margin: '0 auto', width: '100%' }}>

@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import {
   Layout, Card, Typography, Table, Button, Space, Modal, Form,
-  Input, InputNumber, Select, Tag, Popconfirm, message, Row, Col, Divider, List, Tooltip, Badge,
+  Input, InputNumber, Select, Tag, Popconfirm, message, Row, Col, Divider, List, Tooltip, Badge, Switch,
 } from 'antd';
 import {
   PlusOutlined, SearchOutlined, ClearOutlined,
   EyeOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined, BankOutlined,
+  SunOutlined, MoonOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   getPrograme, getProgramiById, createProgram, updateProgram,
   deleteProgram, getLendeProgramit,
@@ -58,6 +60,7 @@ function groupLende(lende) {
 export default function ProgramStudimiPage() {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [programe, setPrograme] = useState([]);
   const [loading, setLoading]   = useState(false);
 
@@ -259,6 +262,12 @@ export default function ProgramStudimiPage() {
             Menaxhimi i Programeve të Studimit
           </Title>
         </Space>
+        <Switch
+          checked={isDark}
+          onChange={toggleTheme}
+          checkedChildren={<MoonOutlined />}
+          unCheckedChildren={<SunOutlined />}
+        />
       </Header>
 
       <Content style={{ padding: '24px' }}>

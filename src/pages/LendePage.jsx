@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import {
   Layout, Card, Typography, Table, Button, Space, Modal, Form,
-  Input, Select, Tag, Popconfirm, message, Row, Col, Divider, List, Avatar, Tooltip, Badge, Radio,
+  Input, Select, Tag, Popconfirm, message, Row, Col, Divider, List, Avatar, Tooltip, Badge, Radio, Switch,
 } from 'antd';
 import {
   PlusOutlined, SearchOutlined, ClearOutlined,
   EyeOutlined, EditOutlined, DeleteOutlined, ArrowLeftOutlined, BankOutlined,
+  SunOutlined, MoonOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { getLende, getLendeById, createLende, updateLende, deleteLende, getPedagogetELendes } from '../api/lendeApi';
 import { VITET } from '../config/constants';
 
@@ -29,6 +31,7 @@ const depName = (id) => DEPARTAMENTET.find((d) => d.id === Number(id))?.name ?? 
 export default function LendePage() {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [lende, setLende] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -255,6 +258,12 @@ export default function LendePage() {
             Menaxhimi i Lëndëve
           </Title>
         </Space>
+        <Switch
+          checked={isDark}
+          onChange={toggleTheme}
+          checkedChildren={<MoonOutlined />}
+          unCheckedChildren={<SunOutlined />}
+        />
       </Header>
 
       <Content style={{ padding: '24px' }}>

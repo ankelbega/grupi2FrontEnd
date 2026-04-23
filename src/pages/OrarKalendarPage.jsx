@@ -17,6 +17,7 @@ import {
   Divider,
   message,
   Avatar,
+  Switch,
 } from 'antd';
 import {
   CalendarOutlined,
@@ -28,9 +29,12 @@ import {
   DeleteOutlined,
   CloseOutlined,
   LogoutOutlined,
+  SunOutlined,
+  MoonOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { API_BASE, authHeaders, TIME_SLOTS, DAYS, SALLET, LLOJI_COLORS } from '../config/constants';
 
 const { Header, Content } = Layout;
@@ -51,6 +55,7 @@ function getTodayDita() {
 export default function OrarKalendarPage() {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   const [pedagoget, setPedag] = useState([]);
   const [programet, setProg] = useState([]);
@@ -227,7 +232,7 @@ export default function OrarKalendarPage() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+    <Layout style={{ minHeight: '100vh' }}>
       <Header
         style={{
           display: 'flex',
@@ -247,6 +252,12 @@ export default function OrarKalendarPage() {
           </Title>
         </Space>
         <Space>
+          <Switch
+            checked={isDark}
+            onChange={toggleTheme}
+            checkedChildren={<MoonOutlined />}
+            unCheckedChildren={<SunOutlined />}
+          />
           <Button type="link" style={{ color: '#aaa' }} onClick={() => navigate('/dashboard')}>
             Dashboard
           </Button>

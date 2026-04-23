@@ -21,6 +21,7 @@ import {
   Col,
   Tooltip,
   Badge,
+  Switch,
 } from 'antd';
 import {
   PlusOutlined,
@@ -32,9 +33,12 @@ import {
   EditOutlined,
   DeleteOutlined,
   BankOutlined,
+  SunOutlined,
+  MoonOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import dayjs from 'dayjs';
 import {
   getPedagoget,
@@ -82,6 +86,7 @@ function getDepartamentEmri(dep_id) {
 export default function PedagogPage() {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const avatarLetter = user?.first_name?.[0]?.toUpperCase() ?? '?';
   const fullName = `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
 
@@ -383,6 +388,12 @@ export default function PedagogPage() {
           </Title>
         </Space>
         <Space>
+          <Switch
+            checked={isDark}
+            onChange={toggleTheme}
+            checkedChildren={<MoonOutlined />}
+            unCheckedChildren={<SunOutlined />}
+          />
           <Text style={{ color: '#fff' }}>{fullName}</Text>
           <Button
             type="text"
@@ -562,7 +573,7 @@ export default function PedagogPage() {
                   }}
                 >
                   <thead>
-                    <tr style={{ background: '#f0f2f5' }}>
+                    <tr style={{ background: 'inherit' }}>
                       <th style={{ border: '1px solid #d9d9d9', padding: '6px 10px', width: 110 }}>
                         Dita
                       </th>
