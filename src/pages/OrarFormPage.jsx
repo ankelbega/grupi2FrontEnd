@@ -12,7 +12,8 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import dayjs from 'dayjs';
 import { getOrarById, createOrar, updateOrar } from '../api/orarApi';
-import { API_BASE, authHeaders, DAYS, SALLET, LLOJI_OPTIONS } from '../config/constants';
+import { DAYS, SALLET, LLOJI_OPTIONS } from '../config/constants';
+import axiosInstance from '../api/axiosInstance';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -62,10 +63,9 @@ export default function OrarFormPage() {
   async function fetchSeksionet(semId) {
     setLoadingSek(true);
     try {
-      const url = semId ? `${API_BASE}/seksione?sem_id=${semId}` : `${API_BASE}/seksione`;
-      const res = await fetch(url, { headers: authHeaders() });
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : data.data ?? [];
+      const response = await axiosInstance.get('/api/seksione', { params: semId ? { sem_id: semId } : {} });
+      const data = response.data?.data ?? response.data;
+      const list = Array.isArray(data) ? data : [];
       setSeksionet(list);
       return list;
     } catch {
@@ -122,8 +122,6 @@ export default function OrarFormPage() {
         ORAR_ORA_MBA: orarOraMba ? orarOraMba.format('HH:mm') : null,
         ORAR_LLOJI: orarLloji,
       };
-
-      console.log('Submitting payload:', payload);
 
       if (isEditMode) {
         await updateOrar(id, payload);

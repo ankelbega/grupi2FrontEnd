@@ -35,7 +35,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { API_BASE, authHeaders, TIME_SLOTS, DAYS, SALLET, LLOJI_COLORS } from '../config/constants';
+import { TIME_SLOTS, DAYS, SALLET, LLOJI_COLORS } from '../config/constants';
+import axiosInstance from '../api/axiosInstance';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -91,9 +92,9 @@ export default function OrarKalendarPage() {
 
   async function fetchPedag() {
     try {
-      const res = await fetch(`${API_BASE}/pedagoget`, { headers: authHeaders() });
-      const data = await res.json();
-      setPedag(Array.isArray(data) ? data : data.data ?? []);
+      const response = await axiosInstance.get('/api/pedagoget');
+      const data = response.data?.data ?? response.data;
+      setPedag(Array.isArray(data) ? data : []);
     } catch {
       setPedag([]);
     }
@@ -101,9 +102,9 @@ export default function OrarKalendarPage() {
 
   async function fetchProg() {
     try {
-      const res = await fetch(`${API_BASE}/programe`, { headers: authHeaders() });
-      const data = await res.json();
-      setProg(Array.isArray(data) ? data : data.data ?? []);
+      const response = await axiosInstance.get('/api/programe');
+      const data = response.data?.data ?? response.data;
+      setProg(Array.isArray(data) ? data : []);
     } catch {
       setProg([]);
     }
@@ -112,16 +113,15 @@ export default function OrarKalendarPage() {
   const fetchOraret = useCallback(async (f = {}) => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (f.pedagog_id) params.append('ped_id', String(f.pedagog_id));
-      if (f.program_id) params.append('prog_id', f.program_id);
-      if (f.viti) params.append('viti', f.viti);
-      if (f.salla_id) params.append('salle_id', String(f.salla_id));
-      if (f.semestri) params.append('semestri', f.semestri);
-      const url = `${API_BASE}/orare${params.toString() ? '?' + params.toString() : ''}`;
-      const res = await fetch(url, { headers: authHeaders() });
-      const data = await res.json();
-      setOraret(Array.isArray(data) ? data : data.data ?? []);
+      const params = {};
+      if (f.pedagog_id) params.ped_id = f.pedagog_id;
+      if (f.program_id) params.prog_id = f.program_id;
+      if (f.viti) params.viti = f.viti;
+      if (f.salla_id) params.salle_id = f.salla_id;
+      if (f.semestri) params.semestri = f.semestri;
+      const response = await axiosInstance.get('/api/orare', { params });
+      const data = response.data?.data ?? response.data;
+      setOraret(Array.isArray(data) ? data : []);
     } catch {
       setOraret([]);
     } finally {
@@ -151,18 +151,11 @@ export default function OrarKalendarPage() {
   async function handleDelete(id) {
     setDeletingId(id);
     try {
-      const res = await fetch(`${API_BASE}/orare/${id}`, {
-        method: 'DELETE',
-        headers: authHeaders(),
-      });
-      if (res.ok || res.status === 204) {
-        message.success('Orari u fshi me sukses');
-        setDrawerOpen(false);
-        setSelectedOrar(null);
-        fetchOraret(activeFilters);
-      } else {
-        message.error('Gabim gjatë fshirjes');
-      }
+      await axiosInstance.delete(`/api/orare/${id}`);
+      message.success('Orari u fshi me sukses');
+      setDrawerOpen(false);
+      setSelectedOrar(null);
+      fetchOraret(activeFilters);
     } catch {
       message.error('Gabim gjatë fshirjes');
     } finally {
