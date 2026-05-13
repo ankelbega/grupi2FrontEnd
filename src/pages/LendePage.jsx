@@ -11,20 +11,11 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { getLende, getLendeById, createLende, updateLende, deleteLende, getPedagogetELendes } from '../api/lendeApi';
-import { VITET } from '../config/constants';
+import { getLende, createLende, updateLende, deleteLende, getPedagogetELendes } from '../api/lendeApi';
+import { VITET, DEPARTAMENTET } from '../config/constants';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
-
-const DEPARTAMENTET = [
-  { id: 1, name: 'Informatikë' },
-  { id: 2, name: 'Matematikë' },
-  { id: 3, name: 'Fizikë' },
-  { id: 4, name: 'Kimi' },
-  { id: 5, name: 'Biologji' },
-  { id: 6, name: 'Ekonomi' },
-];
 
 const depName = (id) => DEPARTAMENTET.find((d) => d.id === Number(id))?.name ?? `Dep ${id}`;
 

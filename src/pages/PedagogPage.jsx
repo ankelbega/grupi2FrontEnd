@@ -48,39 +48,23 @@ import {
   updatePedagog,
   deletePedagog,
 } from '../api/pedagogApi';
+import { DEPARTAMENTET, DAYS } from '../config/constants';
 const SEMESTRAT_OPTIONS = [
-  { label: 'Semestri 1', value: 0 },
-  { label: 'Semestri 2', value: 1 },
-  { label: 'Semestri 3', value: 2 },
-  { label: 'Semestri 4', value: 3 },
-  { label: 'Semestri 5', value: 4 },
-  { label: 'Semestri 6', value: 5 },
+  { label: 'Semestri 1', value: 1 },
+  { label: 'Semestri 2', value: 2 },
+  { label: 'Semestri 3', value: 3 },
+  { label: 'Semestri 4', value: 4 },
+  { label: 'Semestri 5', value: 5 },
+  { label: 'Semestri 6', value: 6 },
 ];
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const DEPARTAMENTET = [
-  { id: 1, emri: 'Departamenti i Informatikës' },
-  { id: 2, emri: 'Departamenti i Matematikës' },
-  { id: 3, emri: 'Departamenti i Fizikës' },
-  { id: 4, emri: 'Departamenti i Kimisë' },
-  { id: 5, emri: 'Departamenti i Biologjisë' },
-  { id: 6, emri: 'Departamenti i Ekonomiksit' },
-];
-
-const DITET = [
-  { nr: 1, emri: 'E Hënë' },
-  { nr: 2, emri: 'E Martë' },
-  { nr: 3, emri: 'E Mërkurë' },
-  { nr: 4, emri: 'E Enjte' },
-  { nr: 5, emri: 'E Premte' },
-];
-
 function getDepartamentEmri(dep_id) {
   const dep = DEPARTAMENTET.find((d) => d.id === Number(dep_id));
-  return dep ? dep.emri : dep_id ?? '—';
+  return dep ? dep.name : dep_id ?? '—';
 }
 
 export default function PedagogPage() {
@@ -205,7 +189,7 @@ export default function PedagogPage() {
   // Build orari weekly grid: rows = days, cells = list of entries
   function buildOrariGrid() {
     const grid = {};
-    DITET.forEach((d) => { grid[d.nr] = []; });
+    DAYS.forEach((d) => { grid[d.key] = []; });
     orari.forEach((entry) => {
       const day = entry.ORA_DITA ?? entry.dita;
       if (grid[day] !== undefined) {
@@ -420,7 +404,7 @@ export default function PedagogPage() {
             >
               {DEPARTAMENTET.map((d) => (
                 <Option key={d.id} value={d.id}>
-                  {d.emri}
+                  {d.name}
                 </Option>
               ))}
             </Select>
@@ -583,8 +567,8 @@ export default function PedagogPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {DITET.map((d) => (
-                      <tr key={d.nr}>
+                    {DAYS.map((d) => (
+                      <tr key={d.key}>
                         <td
                           style={{
                             border: '1px solid #d9d9d9',
@@ -593,14 +577,14 @@ export default function PedagogPage() {
                             verticalAlign: 'top',
                           }}
                         >
-                          {d.emri}
+                          {d.label}
                         </td>
                         <td style={{ border: '1px solid #d9d9d9', padding: '6px 10px' }}>
-                          {orariGrid[d.nr].length === 0 ? (
+                          {orariGrid[d.key].length === 0 ? (
                             <Text type="secondary">—</Text>
                           ) : (
                             <Space direction="vertical" size={2}>
-                              {orariGrid[d.nr].map((entry, idx) => (
+                              {orariGrid[d.key].map((entry, idx) => (
                                 <div key={idx}>
                                   <Text strong>{entry.LEN_EM ?? entry.lenda ?? '—'}</Text>
                                   {' · '}
@@ -711,7 +695,7 @@ export default function PedagogPage() {
                 <Select placeholder="Zgjidhni Departamentin">
                   {DEPARTAMENTET.map((d) => (
                     <Option key={d.id} value={d.id}>
-                      {d.emri}
+                      {d.name}
                     </Option>
                   ))}
                 </Select>

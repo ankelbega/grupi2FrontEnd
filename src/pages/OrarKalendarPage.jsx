@@ -92,7 +92,7 @@ export default function OrarKalendarPage() {
 
   async function fetchPedag() {
     try {
-      const response = await axiosInstance.get('/api/pedagoget');
+      const response = await axiosInstance.get('/pedagoget');
       const data = response.data?.data ?? response.data;
       setPedag(Array.isArray(data) ? data : []);
     } catch {
@@ -102,7 +102,7 @@ export default function OrarKalendarPage() {
 
   async function fetchProg() {
     try {
-      const response = await axiosInstance.get('/api/programe');
+      const response = await axiosInstance.get('/programe');
       const data = response.data?.data ?? response.data;
       setProg(Array.isArray(data) ? data : []);
     } catch {
@@ -119,7 +119,7 @@ export default function OrarKalendarPage() {
       if (f.viti) params.viti = f.viti;
       if (f.salla_id) params.salle_id = f.salla_id;
       if (f.semestri) params.semestri = f.semestri;
-      const response = await axiosInstance.get('/api/orare', { params });
+      const response = await axiosInstance.get('/orare', { params });
       const data = response.data?.data ?? response.data;
       setOraret(Array.isArray(data) ? data : []);
     } catch {
@@ -151,7 +151,7 @@ export default function OrarKalendarPage() {
   async function handleDelete(id) {
     setDeletingId(id);
     try {
-      await axiosInstance.delete(`/api/orare/${id}`);
+      await axiosInstance.delete(`/orare/${id}`);
       message.success('Orari u fshi me sukses');
       setDrawerOpen(false);
       setSelectedOrar(null);

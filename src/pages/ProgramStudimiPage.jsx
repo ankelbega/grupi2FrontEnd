@@ -12,21 +12,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
-  getPrograme, getProgramiById, createProgram, updateProgram,
+  getPrograme, createProgram, updateProgram,
   deleteProgram, getLendeProgramit,
 } from '../api/programStudimiApi';
+import { DEPARTAMENTET } from '../config/constants';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
-
-const DEPARTAMENTET = [
-  { id: 1, name: 'Informatikë' },
-  { id: 2, name: 'Matematikë' },
-  { id: 3, name: 'Fizikë' },
-  { id: 4, name: 'Kimi' },
-  { id: 5, name: 'Biologji' },
-  { id: 6, name: 'Ekonomi' },
-];
 
 const NIVELET = [
   { value: 'Bachelor',    label: 'Bachelor',    color: 'blue' },

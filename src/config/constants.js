@@ -37,6 +37,15 @@ export const SEMESTRAT = [1, 2, 3, 4, 5, 6].map((i) => ({ SEM_ID: i, SEM_EM: `Se
 
 export const VITET = [1, 2, 3, 4];
 
+export const DEPARTAMENTET = [
+  { id: 1, name: 'Informatikë' },
+  { id: 2, name: 'Matematikë' },
+  { id: 3, name: 'Fizikë' },
+  { id: 4, name: 'Kimi' },
+  { id: 5, name: 'Biologji' },
+  { id: 6, name: 'Ekonomi' },
+];
+
 export function authHeaders() {
   return {
     Authorization: `Bearer ${localStorage.getItem('auth_token')}`,

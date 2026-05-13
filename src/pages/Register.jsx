@@ -36,22 +36,12 @@ function getPasswordStrength(pwd) {
 export default function Register() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [passwordValue, setPasswordValue] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Maps backend Albanian field names back to form field names for inline errors
-  const errorFieldMap = {
-    PERD_EMER:    'first_name',
-    PERD_MBIEMER: 'last_name',
-    PERD_EMAIL:   'email',
-    PERD_FJKALIM: 'password',
-  };
-
   const onFinish = async (values) => {
     setLoading(true);
-    setError(null);
     try {
       const res = await api.post('/register', {
         PERD_EMER:                 values.first_name,

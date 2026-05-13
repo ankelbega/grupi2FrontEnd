@@ -24,15 +24,8 @@ const iconStyle = { color: '#9ca3af' };
 export default function Login() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
-
-  // Maps backend Albanian field names back to form field names for inline errors
-  const errorFieldMap = {
-    PERD_EMAIL:   'email',
-    PERD_FJKALIM: 'password',
-  };
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -93,7 +86,6 @@ export default function Login() {
               prefix={<MailOutlined style={iconStyle} />}
               placeholder="emri@universiteti.edu.al"
               style={inputStyle}
-              onChange={() => setError(null)}
             />
           </Form.Item>
 
@@ -107,7 +99,6 @@ export default function Login() {
               prefix={<LockOutlined style={iconStyle} />}
               placeholder="••••••••"
               style={inputStyle}
-              onChange={() => setError(null)}
             />
           </Form.Item>
 

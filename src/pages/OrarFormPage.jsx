@@ -63,7 +63,7 @@ export default function OrarFormPage() {
   async function fetchSeksionet(semId) {
     setLoadingSek(true);
     try {
-      const response = await axiosInstance.get('/api/seksione', { params: semId ? { sem_id: semId } : {} });
+      const response = await axiosInstance.get('/seksione', { params: semId ? { sem_id: semId } : {} });
       const data = response.data?.data ?? response.data;
       const list = Array.isArray(data) ? data : [];
       setSeksionet(list);
