@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-const { Header, Content } = Layout;
+const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
 
 const roleColors = {
@@ -79,6 +79,8 @@ export default function Dashboard() {
           background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5986 100%)',
           padding: '0 24px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          height: 64,
         }}
       >
         <Space align="center" size={10}>
@@ -110,25 +112,36 @@ export default function Dashboard() {
         </Space>
       </Header>
 
-      <Content style={{ padding: '48px 24px' }}>
+      <Content style={{ padding: '40px 32px' }}>
         <Row justify="center">
-          <Col xs={24} sm={22} md={18} lg={14}>
-            {/* Welcome Banner */}
-            <Card
+          <Col xs={24} sm={22} md={18} lg={16}>
+            {/* Welcome Hero */}
+            <div
               className="stagger-in"
               style={{
-                marginBottom: 24,
+                marginBottom: 32,
                 background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5986 100%)',
-                border: 'none',
-                borderRadius: 12,
-                boxShadow: '0 4px 16px rgba(30,58,95,0.3)',
+                borderRadius: 16,
+                boxShadow: '0 4px 24px rgba(30,58,95,0.35)',
+                padding: '28px 32px',
+                position: 'relative',
                 overflow: 'hidden',
               }}
-              bodyStyle={{ padding: '24px 28px' }}
             >
-              <Space align="center" size={16} style={{ width: '100%' }}>
+              <div style={{
+                position: 'absolute',
+                width: 300,
+                height: 300,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.04)',
+                right: -50,
+                top: -80,
+                pointerEvents: 'none',
+              }} />
+              <Space align="center" size={20} style={{ width: '100%', position: 'relative' }}>
                 <Avatar
-                  size={52}
+                  size={56}
+                  className="avatar-pulse"
                   style={{
                     backgroundColor: 'rgba(255,255,255,0.2)',
                     color: '#fff',
@@ -157,7 +170,20 @@ export default function Dashboard() {
                   </Space>
                 </div>
               </Space>
-            </Card>
+            </div>
+
+            {/* Section label */}
+            <Text style={{
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+              color: '#8c8c8c',
+              display: 'block',
+              marginBottom: 16,
+            }}>
+              Modulet e Sistemit
+            </Text>
 
             {/* Navigation Cards */}
             <Row gutter={[16, 16]}>
@@ -171,20 +197,38 @@ export default function Dashboard() {
                       style={{
                         textAlign: 'center',
                         cursor: 'pointer',
-                        borderLeft: `4px solid ${card.accentColor}`,
+                        borderTop: `3px solid ${card.accentColor}`,
                         borderRadius: 12,
                         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                        overflow: 'hidden',
                       }}
-                      bodyStyle={{ padding: '28px 20px' }}
+                      bodyStyle={{
+                        padding: '28px 20px',
+                        background: `linear-gradient(135deg, ${card.accentColor}15 0%, transparent 60%)`,
+                      }}
                       onClick={() => navigate(card.path)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.boxShadow = `0 12px 32px ${card.accentColor}30`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = '';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                      }}
                     >
-                      <div className="icon-circle" style={{ backgroundColor: card.iconBg }}>
+                      <div
+                        className="icon-circle"
+                        style={{
+                          backgroundColor: card.iconBg,
+                          boxShadow: `0 4px 12px ${card.iconColor}30`,
+                        }}
+                      >
                         <Icon style={{ fontSize: 28, color: card.iconColor }} />
                       </div>
-                      <Title level={5} style={{ margin: 0, marginBottom: 4 }}>
+                      <Title level={5} style={{ margin: 0, marginBottom: 4, fontSize: 15, fontWeight: 600 }}>
                         {card.title}
                       </Title>
-                      <Text type="secondary" style={{ fontSize: 13 }}>
+                      <Text style={{ fontSize: 12, color: '#8c8c8c' }}>
                         {card.desc}
                       </Text>
                     </Card>
@@ -195,6 +239,10 @@ export default function Dashboard() {
           </Col>
         </Row>
       </Content>
+
+      <Footer style={{ textAlign: 'center', background: 'transparent', color: '#bfbfbf', fontSize: 11, padding: '16px 24px' }}>
+        University Management System © 2026 — UAMD Grupi 2
+      </Footer>
     </Layout>
   );
 }

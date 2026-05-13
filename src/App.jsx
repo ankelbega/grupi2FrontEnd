@@ -27,7 +27,28 @@ function GuestRoute({ children }) {
 function AppInner() {
   const { isDark } = useTheme();
   return (
-    <ConfigProvider theme={{ algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm }}>
+    <ConfigProvider
+      theme={{
+        algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
+        token: isDark
+          ? {
+              colorPrimary: '#4096ff',
+              colorBgContainer: '#141414',
+              colorBgLayout: '#0a0a0a',
+              borderRadius: 10,
+              fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+              fontSize: 14,
+            }
+          : {
+              colorPrimary: '#1e3a5f',
+              colorBgContainer: '#ffffff',
+              colorBgLayout: '#f5f7fa',
+              borderRadius: 10,
+              fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+              fontSize: 14,
+            },
+      }}
+    >
       <BrowserRouter>
         <AuthProvider>
           <Routes>
