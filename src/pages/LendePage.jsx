@@ -125,6 +125,9 @@ export default function LendePage() {
       LEN_KOD:       record.LEN_KOD ?? record.kodi,
       DEP_ID:        record.DEP_ID  ?? record.dep_id,
       LP_ZGJEDHORE:  record.LP_ZGJEDHORE ?? 0,
+      LP_VITI:       record.LP_VITI     ?? record.lende_programi?.[0]?.LP_VITI     ?? 1,
+      LP_SEMESTRI:   record.LP_SEMESTRI ?? record.lende_programi?.[0]?.LP_SEMESTRI ?? 1,
+      LP_KREDIT:     record.LP_KREDIT   ?? record.lende_programi?.[0]?.LP_KREDIT   ?? 6,
     });
     setModalFormOpen(true);
   };
@@ -415,6 +418,15 @@ export default function LendePage() {
               placeholder="Zgjidhni departamentin"
               options={DEPARTAMENTET.map((d) => ({ value: d.id, label: d.name }))}
             />
+          </Form.Item>
+          <Form.Item label="Viti" name="LP_VITI" initialValue={1} rules={[{ required: true, message: 'Zgjidhni vitin' }]}>
+            <Select options={[1,2,3].map(v => ({ value: v, label: `Viti ${v}` }))} />
+          </Form.Item>
+          <Form.Item label="Semestri" name="LP_SEMESTRI" initialValue={1} rules={[{ required: true, message: 'Zgjidhni semestrin' }]}>
+            <Select options={[1,2,3,4,5,6].map(s => ({ value: s, label: `Semestri ${s}` }))} />
+          </Form.Item>
+          <Form.Item label="Kredite" name="LP_KREDIT" initialValue={6} rules={[{ required: true, message: 'Zgjidhni kreditet' }]}>
+            <Select options={[3,4,5,6].map(k => ({ value: k, label: `${k} kredite` }))} />
           </Form.Item>
         </Form>
       </Modal>
