@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, Row, Col, Progress, message } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined, BankOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
-import api from '../api/axios';
+import api from "../api/axiosInstance";
 
 const { Title, Text } = Typography;
 
