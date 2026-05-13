@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { MailOutlined, LockOutlined, BankOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
-import api from '../api/axios';
+import api from '../api/axiosInstance';
 
 const { Title, Text } = Typography;
 
@@ -37,7 +37,7 @@ export default function Login() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const res = await api.post('/api/login', {
+      const res = await api.post('/login', {
         PERD_EMAIL:   values.email,
         PERD_FJKALIM: values.password,
       });

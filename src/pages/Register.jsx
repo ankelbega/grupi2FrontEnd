@@ -53,7 +53,7 @@ export default function Register() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.post('/api/register', {
+      const res = await api.post('/register', {
         PERD_EMER:                 values.first_name,
         PERD_MBIEMER:              values.last_name,
         PERD_EMAIL:                values.email,

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import api from '../api/axios';
+import api from '../api/axiosInstance';
 
 export const AuthContext = createContext();
 
@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
     const storedToken = localStorage.getItem('auth_token');
     if (storedToken) {
       api
-        .get('/api/me')
+        .get('/me')
         .then((res) => {
           setUser(res.data.data);
           setToken(storedToken);
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      await api.post('/api/logout');
+      await api.post('/logout');
     } catch {
       // best effort
     }
